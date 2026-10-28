@@ -141,9 +141,13 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 .story{white-space:pre-wrap;font-size:1.1rem;line-height:1.6}
 .quick{display:flex;flex-wrap:wrap;gap:10px}
 </style>
+<style>.mm-bar{max-width:900px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}.mm-link{display:inline-flex;align-items:center;gap:10px;min-height:50px;padding:6px 20px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700;font-size:1rem;text-decoration:none}.mm-link:hover{border-color:var(--green)}.mm-link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.mm-link .ic{font-size:1.2rem;line-height:1}</style>
 </head>
 <body>
 <div class="tibeb" aria-hidden="true"></div>
+<nav class="mm-bar"><a class="mm-link" id="mmLink" href="../index.html"><span class="ic" aria-hidden="true">☰</span><span>Main menu</span></a></nav>
+<script>(function(){var a=document.getElementById("mmLink"),r=document.documentElement;function s(save){var am=r.lang==="am";a.lastChild.textContent=am?"ዋና ማውጫ":"Main menu";if(save){try{localStorage.setItem("family.lang",am?"am":"en")}catch(e){}}}s(false);new MutationObserver(function(){s(true)}).observe(r,{attributes:true,attributeFilter:["lang"]})})();</script>
+
 <main class="wrap">
   <div class="bar">
     <div><div class="label" data-t="kicker"></div><h1 data-t="app"></h1></div>

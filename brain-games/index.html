@@ -72,6 +72,12 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 .player .nm{font-weight:700;font-size:1.2rem}
 .player .pt{font-size:.95rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .rename{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.names-form{flex-direction:column;align-items:flex-start;gap:12px;width:100%}
+.names{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;width:100%}
+.nfield{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:.95rem}
+.names-form .nfield input{flex:none;height:auto;font-size:1.05rem}
+.nfield input{font:inherit;font-weight:400;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);width:100%;min-width:0}
+
 .rename input{font:inherit;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);flex:1 1 200px;min-width:0}
 .linkish{color:var(--green);font-weight:700;text-decoration:underline;text-underline-offset:4px;min-height:44px;padding:0 4px}
 .games{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
@@ -203,9 +209,13 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 #cheer .msg .pts{font-size:1.5rem;font-weight:700;color:var(--gold)}
 @media (prefers-reduced-motion:reduce){.slots.wrong{animation:none}}
 </style>
+<style>.mm-bar{max-width:900px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}.mm-link{display:inline-flex;align-items:center;gap:10px;min-height:50px;padding:6px 20px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700;font-size:1rem;text-decoration:none}.mm-link:hover{border-color:var(--green)}.mm-link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.mm-link .ic{font-size:1.2rem;line-height:1}</style>
 </head>
 <body>
 <div class="tibeb" aria-hidden="true"></div>
+<nav class="mm-bar"><a class="mm-link" id="mmLink" href="../index.html"><span class="ic" aria-hidden="true">☰</span><span>Main menu</span></a></nav>
+<script>(function(){var a=document.getElementById("mmLink"),r=document.documentElement;function s(save){var am=r.lang==="am";a.lastChild.textContent=am?"ዋና ማውጫ":"Main menu";if(save){try{localStorage.setItem("family.lang",am?"am":"en")}catch(e){}}}s(false);new MutationObserver(function(){s(true)}).observe(r,{attributes:true,attributeFilter:["lang"]})})();</script>
+
 <main class="wrap">
 
   <!-- HOME -->
@@ -221,8 +231,13 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
       <div class="bar"><h3 data-t="who"></h3><button class="linkish" type="button" id="renameBtn" data-t="rename"></button></div>
       <div class="players" id="players"></div>
       <button class="linkish" type="button" id="newGuestBtn" hidden style="align-self:flex-start"></button>
-      <form class="rename" id="renameForm" hidden>
-        <input type="text" id="renameInput" maxlength="20" autocomplete="off">
+      <form class="rename names-form" id="renameForm" hidden>
+        <div class="names">
+          <label class="nfield"><span data-t="p1Label"></span><input type="text" id="name0" maxlength="20" autocomplete="off"></label>
+          <label class="nfield"><span data-t="p2Label"></span><input type="text" id="name1" maxlength="20" autocomplete="off"></label>
+          <label class="nfield"><span data-t="p3Label"></span><input type="text" id="name2" maxlength="20" autocomplete="off"></label>
+        </div>
+        <div class="muted small" data-t="nameHint"></div>
         <button class="btn primary" type="submit" data-t="save"></button>
       </form>
     </div>
@@ -421,7 +436,7 @@ const T={
   qOver:"Final scores",qWinner:n=>`${n} wins the quiz!`,qTie:n=>`It's a tie: ${n}!`,playAgain:"Play again",backSetup:"Change players",
   qwins:"Quiz wins",histQuiz:"Family Quiz win",cheerQuiz:n=>`${n} won the Family Quiz.`,
   qHow:"How to play: one person taps a square and reads the question out loud. Whoever answers right first gets the points and picks the next square. The winner earns 50 bonus points.",
-  app:"Family Brain Games",langBtn:"አማርኛ",play:"Play →",home:"← Home",who:"Who is playing?",rename:"Change name",save:"Save",
+  app:"Family Brain Games",langBtn:"አማርኛ",play:"Play →",home:"← Home",who:"Who is playing?",rename:"Change names",p1Label:"Player 1",p2Label:"Player 2",p3Label:"Guest",nameHint:"Type any name. Leave a box empty to use Mom, Dad or Guest, which switch language with the rest of the app.",save:"Save",
   mom:"Mom",dad:"Dad",points:"points",scores:"Score collector",seeScores:"See scores →",
   wTitle:"Word Builder",wDesc:"Build the Amharic word from the tiles. Watch out: some tiles are look-alikes that don't belong.",
   sTitle:"Fidel Sudoku",sDesc:"Answer the clue by filling the grid. Each row, column and box uses every letter once.",
@@ -461,7 +476,7 @@ const T={
   qOver:"የመጨረሻ ውጤት",qWinner:n=>`አሸናፊ፦ ${n}!`,qTie:n=>`እኩል ወጡ፦ ${n}!`,playAgain:"እንደገና ተጫወቱ",backSetup:"ተጫዋቾችን ቀይሩ",
   qwins:"የውድድር ድሎች",histQuiz:"የቤተሰብ ጥያቄና መልስ ድል",cheerQuiz:n=>`የቤተሰብ ጥያቄና መልስ አሸናፊ፦ ${n}`,
   qHow:"አጨዋወት፦ አንድ ሰው ሳጥን ይነካና ጥያቄውን ጮክ ብሎ ያነባል። ቀድሞ በትክክል የመለሰ ነጥቡን ያገኛል፣ ቀጣዩንም ሳጥን ይመርጣል። አሸናፊው 50 ተጨማሪ ነጥብ ያገኛል።",
-  app:"የቤተሰብ የአእምሮ ጨዋታዎች",langBtn:"English",play:"ተጫወቱ →",home:"← ዋና ገጽ",who:"ማን ነው የሚጫወተው?",rename:"ስም ቀይር",save:"አስቀምጥ",
+  app:"የቤተሰብ የአእምሮ ጨዋታዎች",langBtn:"English",play:"ተጫወቱ →",home:"← ዋና ገጽ",who:"ማን ነው የሚጫወተው?",rename:"ስሞችን ቀይር",p1Label:"ተጫዋች 1",p2Label:"ተጫዋች 2",p3Label:"እንግዳ",nameHint:"ማንኛውንም ስም ይጻፉ። ባዶ ከተተወ እማማ፣ አባባ ወይም እንግዳ ይሆናል፤ ከቋንቋው ጋርም ይቀየራል።",save:"አስቀምጥ",
   mom:"እማማ",dad:"አባባ",points:"ነጥብ",scores:"የነጥብ መዝገብ",seeScores:"ውጤቶችን እዩ →",
   wTitle:"የቃል ጨዋታ",wDesc:"ከፊደሎቹ የአማርኛውን ቃል ሥሩ። ተጠንቀቁ፤ የማይገቡ ተመሳሳይ ፊደሎችም አሉ።",
   sTitle:"የፊደል ሱዶኩ",sDesc:"ሰንጠረዡን በመሙላት ጥያቄውን መልሱ። እያንዳንዱ ረድፍ፣ ዓምድ እና ሳጥን እያንዳንዱን ፊደል አንድ ጊዜ ይይዛል።",
@@ -581,7 +596,7 @@ function blankPlayer(){return{name:"",wb:{level:1,idx:0,res:[]},sd:null,sdSize:4
 let players=[0,1,2].map(i=>ls.get("p"+i,null)||blankPlayer());
 let cur=ls.get("cur",0);if(![0,1,2].includes(cur))cur=0;
 const P=()=>players[cur];
-const pname=i=>players[i].name||t(["mom","dad","guest"][i]);
+const pname=i=>{const n=players[i].name;return n?(n[0]==="@"?t(n.slice(1)):n):t(["mom","dad","guest"][i])};
 function save(){const p=P();p.updatedAt=Date.now();ls.set("p"+cur,p)}
 
 /* backup / restore: a file in the iPad's Files app, in case Safari clears its storage */
@@ -642,8 +657,13 @@ function renderHome(){
 let gArm=false;
 $("newGuestBtn").onclick=()=>{if(!gArm){gArm=true;renderHome();setTimeout(()=>{gArm=false;renderHome()},3000);return}
  gArm=false;players[2]=blankPlayer();ls.set("p2",players[2]);renderHome()};
-$("renameBtn").onclick=()=>{const f=$("renameForm");f.hidden=!f.hidden;if(!f.hidden){$("renameInput").value=P().name||pname(cur);$("renameInput").focus()}};
-$("renameForm").onsubmit=e=>{e.preventDefault();P().name=$("renameInput").value.trim().slice(0,20);save();$("renameForm").hidden=true;renderHome()};
+const DEFNAMES=[["Mom","እማማ"],["Dad","አባባ"],["Guest","እንግዳ"]];
+/* a name typed as Mom/Dad/Guest (in either language) is stored as "default", so it keeps translating */
+function cleanName(v,i){v=String(v||"").trim().slice(0,20);const k=DEFNAMES.findIndex(d=>d.some(x=>x.toLowerCase()===v.toLowerCase()));
+ if(k<0)return v;return k===i?"":"@"+["mom","dad","guest"][k]}
+players.forEach((p,i)=>{if(p.name&&p.name[0]!=="@")p.name=cleanName(p.name,i)});
+$("renameBtn").onclick=()=>{const f=$("renameForm");f.hidden=!f.hidden;if(!f.hidden){[0,1,2].forEach(i=>{const el=$("name"+i);const n=players[i].name||"";el.value=n[0]==="@"?t(n.slice(1)):n;el.placeholder=t(["mom","dad","guest"][i])});$("name0").focus()}};
+$("renameForm").onsubmit=e=>{e.preventDefault();[0,1,2].forEach(i=>{players[i].name=cleanName($("name"+i).value,i);players[i].updatedAt=Date.now();ls.set("p"+i,players[i])});$("renameForm").hidden=true;renderAll()};
 
 /* ================= Word Builder ================= */
 const COUNTS=[8,10,15,20,25];
