@@ -80,7 +80,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-o
 
 .rename input{font:inherit;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);flex:1 1 200px;min-width:0}
 .linkish{color:var(--green);font-weight:700;text-decoration:underline;text-underline-offset:4px;min-height:44px;padding:0 4px}
-.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+@media (min-width:700px){.games{grid-template-columns:repeat(2,1fr)}}
 .game-card{background:var(--surface);border:2px solid var(--line);border-radius:var(--r);padding:24px;text-align:left;display:flex;flex-direction:column;gap:12px;min-height:250px}
 .game-card:hover{border-color:var(--green)}
 .game-card .glyph{font-family:var(--f-geez);font-size:2.4rem;line-height:1;color:var(--green);display:flex;gap:6px}
@@ -201,6 +202,24 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 .player.guest{border-style:dashed}
 .guestline{margin-top:12px}
 
+
+/* Fidel chart puzzle */
+.mini-chart{display:grid;grid-template-columns:repeat(4,40px);gap:3px;font-family:var(--f-geez);font-weight:700;font-size:1.25rem}
+.mini-chart span{height:40px;display:grid;place-items:center;background:var(--gold-soft);border-radius:6px}
+.mini-chart span.g{background:var(--green-soft)}.mini-chart span.e{background:var(--bg)}
+.slstats{display:flex;gap:22px;font-size:1.05rem}.slstats b{font-variant-numeric:tabular-nums;font-size:1.25rem}
+.note8{background:var(--gold-soft);border-radius:14px;padding:10px 16px;font-size:1rem}
+.sboard-wrap{overflow-x:auto}
+.sboard{position:relative;width:100%;margin:0 auto;background:var(--bg);border:4px solid var(--ink);border-radius:14px;min-width:320px}
+.stile{position:absolute;width:calc(100% / var(--c));height:calc(100% / var(--r));padding:3px;transition:left .14s ease,top .14s ease}
+.stile span{display:grid;place-items:center;width:100%;height:100%;border-radius:10px;background:var(--gold-soft);border:2px solid var(--gold);
+ font-family:var(--f-geez);font-weight:700;font-size:var(--fs,28px);line-height:1;color:var(--ink);box-shadow:0 3px 0 var(--gold)}
+.stile.ok span{background:var(--green-soft);border-color:var(--green);box-shadow:0 3px 0 var(--green)}
+.stile.hint span{animation:glow 1s ease-in-out infinite;border-color:var(--berry);border-width:4px}
+.sboard.peek .stile span{background:var(--surface);border-color:var(--line);box-shadow:none}
+.sboard.won .stile span{background:var(--green);color:var(--surface);border-color:var(--green);box-shadow:none}
+@keyframes glow{50%{transform:scale(.9)}}
+@media (prefers-reduced-motion:reduce){.stile{transition:none}.stile.hint span{animation:none}}
 /* Cheer */
 #cheer{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 70%,transparent)}
 #cheer canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -261,6 +280,13 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
         <h2 data-t="qTitle"></h2>
         <div class="muted" data-t="qDesc"></div>
         <div class="status" id="qStatus"></div>
+        <div class="go" data-t="play"></div>
+      </button>
+      <button class="game-card" type="button" id="goSlide">
+        <div class="mini-chart" aria-hidden="true"><span class="g">ሀ</span><span class="g">ሁ</span><span class="g">ሂ</span><span>ሄ</span><span class="g">ለ</span><span>ሊ</span><span class="g">ሉ</span><span class="e"></span><span class="g">ሐ</span><span class="g">ሑ</span><span>ሓ</span><span>ሒ</span></div>
+        <h2 data-t="slTitle"></h2>
+        <div class="muted" data-t="slDesc"></div>
+        <div class="status" id="slStatus"></div>
         <div class="go" data-t="play"></div>
       </button>
     </div>
@@ -378,6 +404,39 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
     <div class="panel result" id="qEnd" hidden></div>
   </section>
 
+  <!-- FIDEL CHART PUZZLE -->
+  <section class="view" id="v-slide" hidden>
+    <div class="bar">
+      <button class="btn ghost" type="button" data-home data-t="home"></button>
+      <div class="lvl"><b id="slBadge"></b><span class="muted small" id="slInfo"></span></div>
+    </div>
+    <div class="bar">
+      <h2 data-t="slTitle"></h2>
+      <div class="slstats"><span><span data-t="slMovesL"></span>: <b id="slMoves">0</b></span><span><span data-t="slRight"></span>: <b id="slRight">0</b></span></div>
+    </div>
+    <div class="note8" id="sl8" hidden data-t="slAdds8"></div>
+    <div class="sboard-wrap"><div class="sboard" id="sboard"></div></div>
+    <div class="feedback" id="slFb" aria-live="polite" style="text-align:center"></div>
+    <div class="actions">
+      <button class="btn gold" type="button" id="slHintBtn" data-t="hint"></button>
+      <button class="btn ghost" type="button" id="slUndoBtn" data-t="slUndo"></button>
+      <button class="btn ghost" type="button" id="slPeekBtn"></button>
+      <button class="btn ghost" type="button" id="slRestartBtn"></button>
+    </div>
+    <div class="panel result" id="slDone" hidden>
+      <h2 id="slDoneT"></h2>
+      <div class="stars" id="slStars"></div>
+      <div class="big-score" id="slDonePts"></div>
+      <div class="muted" id="slDoneMoves"></div>
+      <div class="muted small" id="slNextInfo"></div>
+      <div class="actions">
+        <button class="btn primary" type="button" id="slNextBtn"></button>
+        <button class="btn ghost" type="button" id="slReplayBtn" data-t="slReplay"></button>
+      </div>
+    </div>
+    <div class="muted small" data-t="slHow"></div>
+  </section>
+
   <!-- SCORES -->
   <section class="view" id="v-scores" hidden>
     <div class="bar">
@@ -424,6 +483,13 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 /* ================= text ================= */
 const T={
  en:{
+  slTitle:"Fidel Chart Puzzle",slDesc:"Slide the letters back into the order of the fidel chart (ሀ ሁ ሂ ሃ ሄ ህ ሆ), one letter family per row.",
+  slStatus:(l,r,c)=>`Level ${l} · ${r} × ${c} board`,slMovesL:"Moves",slRight:"In place",slUndo:"Undo",slPeek:"Show the finished chart",slUnpeek:"Back to my puzzle",
+  slRestart:"Start this level again",slRestartC:"Tap again to start over",
+  slHow:"Tap a letter next to the empty space to slide it in. Tap a letter further along the same row or column to slide several at once. Green letters are already in the right place.",
+  slDoneT:l=>`Level ${l} solved!`,slMovesN:m=>`Solved in ${m} moves`,slNext:l=>`Start level ${l} →`,slReplay:"Play this level again",
+  slNextInfo:(r,c)=>`Next: a ${r} × ${c} board`,slHintMsg:"Slide the glowing letter next.",slAdds8:"From here the chart includes the 8th form (ሏ, ሟ, ሯ…).",
+  slFams:(a,b)=>`rows ${a} to ${b}`,histSlide:l=>`Fidel Chart Puzzle · level ${l}`,slides:"Chart puzzles solved",cheerSlide:l=>`You solved level ${l} of the Fidel Chart Puzzle.`,
   qTitle:"Family Quiz",qDesc:"A quiz-show board for two or more players. Pick a square, read the question out loud, and whoever answers right first wins the points.",
   qStatusGo:"Game in progress, pick up where you left off",qStatusNew:"For two or more players",
   guest:"Guest",newGuest:"Start fresh for a new guest",newGuestConfirm:"Tap again to clear the guest's scores",
@@ -464,6 +530,13 @@ const T={
   lastBackup:d=>`Last backup: ${d}`,noBackup:"No backup saved yet.",
   greet:["Good morning","Good afternoon","Good evening"],cur:"Level"},
  am:{
+  slTitle:"የፊደል ገበታ እንቆቅልሽ",slDesc:"ፊደሎቹን በማንሸራተት እንደ ፊደል ገበታው (ሀ ሁ ሂ ሃ ሄ ህ ሆ) በየረድፉ አስተካክሉ።",
+  slStatus:(l,r,c)=>`ደረጃ ${l} · ${r} × ${c} ሰሌዳ`,slMovesL:"እንቅስቃሴዎች",slRight:"በቦታቸው",slUndo:"ወደ ኋላ",slPeek:"የተስተካከለውን ገበታ አሳይ",slUnpeek:"ወደ እንቆቅልሹ ተመለስ",
+  slRestart:"ይህንን ደረጃ እንደገና ጀምር",slRestartC:"እንደገና ለመጀመር ይንኩ",
+  slHow:"ከባዶው ቦታ አጠገብ ያለውን ፊደል ይንኩ፤ ወደ ባዶው ይንሸራተታል። በዚያው ረድፍ ወይም ዓምድ ራቅ ያለውን ቢነኩ ብዙ ፊደሎች በአንድ ጊዜ ይንሸራተታሉ። አረንጓዴዎቹ በትክክለኛ ቦታቸው ናቸው።",
+  slDoneT:l=>`ደረጃ ${l} ተፈታ!`,slMovesN:m=>`በ${m} እንቅስቃሴዎች ተፈታ`,slNext:l=>`ደረጃ ${l} ጀምሩ →`,slReplay:"ይህንን ደረጃ እንደገና",
+  slNextInfo:(r,c)=>`ቀጣይ፦ ${r} × ${c} ሰሌዳ`,slHintMsg:"ቀጥሎ የሚያበራውን ፊደል ያንሸራቱ።",slAdds8:"ከዚህ ጀምሮ ገበታው 8ኛውን ቤት (ሏ፣ ሟ፣ ሯ…) ይጨምራል።",
+  slFams:(a,b)=>`ረድፎች ከ${a} እስከ ${b}`,histSlide:l=>`የፊደል ገበታ እንቆቅልሽ · ደረጃ ${l}`,slides:"የተፈቱ የገበታ እንቆቅልሾች",cheerSlide:l=>`የፊደል ገበታ እንቆቅልሽ ደረጃ ${l} ፈታችሁ።`,
   qTitle:"የቤተሰብ ጥያቄና መልስ",qDesc:"ለሁለት እና ከዚያ በላይ ተጫዋቾች የሚሆን የጥያቄ ሰሌዳ። ሳጥን ምረጡ፣ ጥያቄውን ጮክ ብላችሁ አንብቡ፤ ቀድሞ በትክክል የመለሰ ነጥቡን ያገኛል።",
   qStatusGo:"ያልተጨረሰ ጨዋታ፤ ካቆማችሁበት ቀጥሉ",qStatusNew:"ለሁለት እና ከዚያ በላይ ተጫዋቾች",
   guest:"እንግዳ",newGuest:"ለአዲስ እንግዳ እንደገና ጀምር",newGuestConfirm:"የእንግዳውን ነጥብ ለማጥፋት እንደገና ይንኩ",
@@ -625,7 +698,7 @@ function streak(days){let n=0;const s=new Set(days);const d=new Date();if(!s.has
 
 /* ================= views ================= */
 let view="home";
-function show(v){view=v;["home","words","sudoku","scores","quiz"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
+function show(v){view=v;["home","words","sudoku","scores","quiz","slide"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
 document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{show("home");renderHome()});
 $("langBtn").onclick=()=>{lang=lang==="en"?"am":"en";ls.set("lang",lang);renderAll()};
 $("goWords").onclick=()=>{show("words");renderWords()};
@@ -638,7 +711,7 @@ function renderAll(){
  $("langBtn").textContent=t("langBtn");
  const hr=new Date().getHours();$("greet").textContent=t("greet")[hr<12?0:hr<17?1:2];
  renderHome();
- if(view==="words")renderWords();if(view==="sudoku")renderSudoku();if(view==="scores")renderScores();if(view==="quiz")renderQuiz();
+ if(view==="words")renderWords();if(view==="sudoku")renderSudoku();if(view==="scores")renderScores();if(view==="quiz")renderQuiz();if(view==="slide")renderSlide();
 }
 function renderHome(){
  const box=$("players");box.innerHTML="";
@@ -653,6 +726,7 @@ function renderHome(){
  $("wStatus").textContent=T[lang].wStatus(wb.level,Math.min(wb.idx+1,spec.count),spec.count);
  $("sStatus").textContent=P().sd&&!P().sd.won?t("sStatusGo"):t("sStatusNew");
  $("homePts").textContent=P().st.points;
+ {const L=P().sl?P().sl.level:1,sp=slSpec(L);$("slStatus").textContent=T[lang].slStatus(L,sp.r,sp.c)}
 }
 let gArm=false;
 $("newGuestBtn").onclick=()=>{if(!gArm){gArm=true;renderHome();setTimeout(()=>{gArm=false;renderHome()},3000);return}
@@ -830,13 +904,13 @@ function renderScores(){
  $("scoreTitle").textContent=T[lang].scoreTitle(pname(cur));
  $("saveNote").textContent=t("savedLocal");
  const lb=ls.get("lastBackup",null);$("lastBackup").textContent=lb?T[lang].lastBackup(lb):t("noBackup");
- const tiles=[["total",st.points],["words",st.words],["levels",st.levels],["sudokus",st.sudokus],["qwins",st.qwins||0],["streak",streak(st.days)]];
+ const tiles=[["total",st.points],["words",st.words],["levels",st.levels],["sudokus",st.sudokus],["qwins",st.qwins||0],["slides",st.slides||0],["streak",streak(st.days)]];
  $("statTiles").innerHTML=tiles.map(([k,v])=>`<div class="stat"><span class="muted small">${esc(t(k))}</span><b>${v}</b></div>`).join("");
  const a=players[0].st.points,b=players[1].st.points;
  $("vs").innerHTML=[0,1].map(i=>{const pts=players[i].st.points,lead=pts>0&&pts===Math.max(a,b)&&a!==b;
   return `<div class="stat${lead?" lead":""}"><span class="small">${esc(pname(i))}${lead?" ★":""}</span><b>${pts}</b><span class="muted small">${esc(t("cur"))} ${players[i].wb.level} · ${players[i].st.sudokus} ${esc(t("sudokus").toLowerCase())}</span></div>`}).join("");
  $("guestLine").textContent=players[2].st.points>0?T[lang].guestLine(pname(2),players[2].st.points):"";
- $("hist").innerHTML=st.hist.length?st.hist.map(h=>{const txt=h.L?T[lang].histWords(h.L):h.w?T[lang].histSudoku(h.w):h.q?t("histQuiz"):h.txt;
+ $("hist").innerHTML=st.hist.length?st.hist.map(h=>{const txt=h.sl?T[lang].histSlide(h.sl):h.L?T[lang].histWords(h.L):h.w?T[lang].histSudoku(h.w):h.q?t("histQuiz"):h.txt;
   return `<div><span><span class="muted small">${esc(h.d)}</span><br>${esc(txt)}</span><b>${esc(T[lang].pts(h.pts))}</b></div>`}).join(""):`<p class="muted">${esc(t("none"))}</p>`;
 }
 
@@ -925,6 +999,93 @@ $("famEditBtn").onclick=()=>{qScreen="edit";renderQuiz()};
 $("famDone").onclick=()=>{qScreen="setup";renderQuiz()};
 $("qSetupBtn").onclick=()=>{qScreen="setup";renderQuiz()};
 $("qNewBtn").onclick=()=>{if(!qArm){qArm=true;renderQuiz();setTimeout(()=>{qArm=false;if(view==="quiz")renderQuiz()},3000);return}qArm=false;Q.done=true;Q.win=[];saveQ();qScreen="setup";renderQuiz()};
+
+/* ================= Fidel Chart Puzzle (sliding) ================= */
+/* The 33 letter families in chart order; [base code point, "-wa" form or null] */
+const FAMS=[[0x1200,null],[0x1208,0x120F],[0x1210,0x1217],[0x1218,0x121F],[0x1220,0x1227],[0x1228,0x122F],[0x1230,0x1237],[0x1238,0x123F],
+ [0x1240,0x124B],[0x1260,0x1267],[0x1270,0x1277],[0x1278,0x127F],[0x1280,0x128B],[0x1290,0x1297],[0x1298,0x129F],[0x12A0,0x12A7],
+ [0x12A8,0x12B3],[0x12B8,0x12C3],[0x12C8,null],[0x12D0,null],[0x12D8,0x12DF],[0x12E0,0x12E7],[0x12E8,null],[0x12F0,0x12F7],
+ [0x1300,0x1307],[0x1308,0x1313],[0x1320,0x1327],[0x1328,0x132F],[0x1330,0x1337],[0x1338,0x133F],[0x1340,null],[0x1348,0x134F],[0x1350,0x1357]];
+const FAMS8=FAMS.filter(f=>f[1]);
+const SL_LEVELS=[{r:3,c:7,mix:16},{r:3,c:7,mix:40},{r:6,c:7,mix:45},{r:6,c:7,mix:90},{r:10,c:7,mix:90},{r:10,c:7,mix:180},
+ {r:3,c:8,mix:60},{r:6,c:8,mix:120},{r:10,c:8,mix:200}];
+function slSpec(L){if(L<=SL_LEVELS.length)return SL_LEVELS[L-1];return{r:10,c:8,mix:Math.min(500,200+50*(L-SL_LEVELS.length))}}
+function slStart(L){const c=slSpec(L).c,list=c===8?FAMS8:FAMS;let s=0;for(let k=1;k<L;k++){const sp=slSpec(k);if(sp.c===c)s+=sp.r}return s%list.length}
+function slChar(L,id){const sp=slSpec(L),list=sp.c===8?FAMS8:FAMS,row=Math.floor(id/sp.c),col=id%sp.c,f=list[(slStart(L)+row)%list.length];
+ return String.fromCodePoint(col<7?f[0]+col:f[1])}
+function slNeighbors(g,r,c){const out=[],gr=Math.floor(g/c),gc=g%c;if(gr>0)out.push(g-c);if(gr<r-1)out.push(g+c);if(gc>0)out.push(g-1);if(gc<c-1)out.push(g+1);return out}
+function newSlide(L){
+ const sp=slSpec(L),n=sp.r*sp.c,tiles=[...Array(n).keys()];tiles[n-1]=-1;
+ let g=n-1,prev=-1;const path=[g];
+ for(let k=0;k<sp.mix;k++){const opts=slNeighbors(g,sp.r,sp.c).filter(x=>x!==prev);const x=opts[Math.floor(Math.random()*opts.length)];
+  tiles[g]=tiles[x];tiles[x]=-1;prev=g;g=x;
+  if(path.length>=2&&path[path.length-2]===g)path.pop();else path.push(g)}
+ if(tiles.every((v,i)=>i===n-1?v===-1:v===i))return newSlide(L);
+ P().sl={level:L,tiles,path,par:path.length-1,undo:[],moves:0,hints:0,done:false,best:(P().sl&&P().sl.best)||{}};save();
+}
+function slGap(){return P().sl.tiles.indexOf(-1)}
+function slStep(x){const s=P().sl,g=slGap();s.tiles[g]=s.tiles[x];s.tiles[x]=-1;s.moves++;
+ if(s.path.length>=2&&s.path[s.path.length-2]===x)s.path.pop();else s.path.push(x)}
+function slSolved(){const s=P().sl;return s.tiles.every((v,i)=>i===s.tiles.length-1?v===-1:v===i)}
+let slPeek=false,slHintCell=-1,slRestartArm=false;
+function slTap(cell){
+ const s=P().sl;if(s.done||slPeek)return;const sp=slSpec(s.level),g=slGap();
+ const gr=Math.floor(g/sp.c),gc=g%sp.c,r=Math.floor(cell/sp.c),c=cell%sp.c;
+ if(cell===g||(r!==gr&&c!==gc))return;
+ const step=r===gr?(c<gc?-1:1):(r<gr?-sp.c:sp.c);
+ let cur=g;const moved=[];
+ while(cur!==cell){const nx=cur+step;moved.push(cur);slStep(nx);cur=nx}
+ s.undo.push(...moved);if(s.undo.length>300)s.undo=s.undo.slice(-300);
+ slHintCell=-1;$("slFb").textContent="";
+ if(slSolved())slFinish();else save();renderSlide();
+}
+function slFinish(){
+ const s=P().sl,L=s.level;s.done=true;
+ const ratio=s.moves/Math.max(1,s.par);let stars=ratio<=1.3?3:ratio<=2.5?2:1;if(s.hints>0)stars=Math.min(stars,2);
+ const pts=10*Math.min(L,10)+10*stars;s.stars=stars;s.pts=pts;
+ s.best[L]=Math.max(s.best[L]||0,stars);
+ P().st.slides=(P().st.slides||0)+1;award(pts,"slide");P().st.hist[0].sl=L;save();
+ const sp=slSpec(L),list=sp.c===8?FAMS8:FAMS,letters=[];for(let k=0;k<sp.r;k++)letters.push(String.fromCodePoint(list[(slStart(L)+k)%list.length][0]));
+ setTimeout(()=>cheer(T[lang].cheerSlide(L),pts,letters),450);
+}
+function renderSlide(){
+ const s=P().sl;if(!s)return;const L=s.level,sp=slSpec(L),n=sp.r*sp.c,list=sp.c===8?FAMS8:FAMS;
+ $("slBadge").textContent=t("level")+" "+L;
+ const first=String.fromCodePoint(list[slStart(L)][0]),last=String.fromCodePoint(list[(slStart(L)+sp.r-1)%list.length][0]);
+ $("slInfo").textContent=`${sp.r} × ${sp.c} · `+T[lang].slFams(first,last);
+ $("sl8").hidden=sp.c!==8;
+ const right=s.tiles.filter((v,i)=>v===i).length;
+ $("slMoves").textContent=s.moves;$("slRight").textContent=`${right} / ${n-1}`;
+ const b=$("sboard");b.style.setProperty("--c",sp.c);b.style.setProperty("--r",sp.r);
+ b.style.aspectRatio=`${sp.c} / ${sp.r}`;b.style.maxWidth=`${sp.c*96}px`;
+ const sig=L+":"+n+":"+(s.done?1:0);
+ if(b.dataset.sig!==sig){b.innerHTML="";b.dataset.sig=sig;
+  for(let id=0;id<n;id++){if(id===n-1&&!s.done)continue;const e=document.createElement("button");e.type="button";e.className="stile";e.dataset.id=id;
+   e.innerHTML=`<span></span>`;e.firstChild.textContent=slChar(L,id);e.onclick=()=>{const cell=(slPeek?id:P().sl.tiles.indexOf(id));slTap(cell)};b.appendChild(e)}}
+ const fs=(b.clientWidth||sp.c*80)/sp.c*.5;b.style.setProperty("--fs",fs+"px");
+ b.classList.toggle("peek",slPeek);b.classList.toggle("won",s.done);
+ b.querySelectorAll(".stile").forEach(e=>{const id=+e.dataset.id;const cell=(slPeek||s.done)?id:s.tiles.indexOf(id);
+  e.style.left=(cell%sp.c)*100/sp.c+"%";e.style.top=Math.floor(cell/sp.c)*100/sp.r+"%";
+  e.classList.toggle("ok",!slPeek&&cell===id);e.classList.toggle("hint",cell===slHintCell&&!slPeek);
+  e.setAttribute("aria-label",slChar(L,id))});
+ ["slHintBtn","slUndoBtn","slPeekBtn","slRestartBtn"].forEach(id=>$(id).hidden=s.done);
+ $("slPeekBtn").textContent=slPeek?t("slUnpeek"):t("slPeek");
+ $("slUndoBtn").disabled=!s.undo.length;
+ $("slRestartBtn").textContent=slRestartArm?t("slRestartC"):t("slRestart");
+ $("slDone").hidden=!s.done;
+ if(s.done){$("slDoneT").textContent=T[lang].slDoneT(L);$("slStars").innerHTML="★".repeat(s.stars)+`<span class="off">${"★".repeat(3-s.stars)}</span>`;
+  $("slDonePts").textContent=T[lang].pts(s.pts);$("slDoneMoves").textContent=T[lang].slMovesN(s.moves);
+  const nx=slSpec(L+1);$("slNextBtn").textContent=T[lang].slNext(L+1);$("slNextInfo").textContent=T[lang].slNextInfo(nx.r,nx.c)+(nx.c===8&&sp.c!==8?" · "+t("slAdds8"):"")}
+}
+$("goSlide").onclick=()=>{if(!P().sl)newSlide(1);slPeek=false;slHintCell=-1;$("sboard").dataset.sig="";show("slide");renderSlide();requestAnimationFrame(renderSlide)};
+$("slHintBtn").onclick=()=>{const s=P().sl;if(s.path.length<2)return;slHintCell=s.path[s.path.length-2];s.hints++;save();$("slFb").textContent=t("slHintMsg");$("slFb").className="feedback ok";renderSlide()};
+$("slUndoBtn").onclick=()=>{const s=P().sl;if(!s.undo.length||s.done)return;const x=s.undo.pop();slStep(x);slHintCell=-1;save();renderSlide()};
+$("slPeekBtn").onclick=()=>{slPeek=!slPeek;renderSlide()};
+$("slRestartBtn").onclick=()=>{if(!slRestartArm){slRestartArm=true;renderSlide();setTimeout(()=>{slRestartArm=false;if(view==="slide")renderSlide()},3000);return}
+ slRestartArm=false;newSlide(P().sl.level);$("sboard").dataset.sig="";renderSlide()};
+$("slNextBtn").onclick=()=>{newSlide(P().sl.level+1);$("sboard").dataset.sig="";window.scrollTo(0,0);renderSlide();requestAnimationFrame(renderSlide)};
+$("slReplayBtn").onclick=()=>{newSlide(P().sl.level);$("sboard").dataset.sig="";renderSlide();requestAnimationFrame(renderSlide)};
+window.addEventListener("resize",()=>{if(view==="slide")renderSlide()});
 
 /* ================= Cheer: solitaire-style bouncing fidel tiles ================= */
 let cheerRun=null;
