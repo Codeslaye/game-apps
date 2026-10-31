@@ -103,6 +103,7 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 .zoom button.fit{font-size:.85rem}
 .edge{fill:none;stroke:var(--muted);stroke-width:2.5;stroke-linejoin:round}
 .couple{stroke:var(--gold);stroke-width:4}
+.edge.link{stroke:var(--gold);stroke-dasharray:8 7;stroke-width:3}
 .ring{fill:var(--surface);stroke:var(--gold);stroke-width:3}
 .nbox{fill:var(--surface);stroke:var(--line);stroke-width:2.5}
 .node:hover .nbox{stroke:var(--green)}
@@ -438,25 +439,52 @@ function computeGens(){
  const min=Math.min(0,...Object.values(g));Object.keys(g).forEach(k=>g[k]-=min);return g;
 }
 function layout(){
+ /* Family-block layout: every couple (or single person) is a unit; children's units hang under the unit of
+    their parents, so each family gets its own space and its own connecting line. */
  const g=computeGens();pos={};
- const rows=[];people.forEach(p=>{(rows[g[p.id]]=rows[g[p.id]]||[]).push(p)});
- const units=[];
- rows.forEach((row,r)=>{if(!row)return;
-  row.sort((a,b)=>(parseInt(a.birthYear)||9999)-(parseInt(b.birthYear)||9999)||full(a).localeCompare(full(b)));
-  const seen=new Set(),us=[];
-  row.forEach(p=>{if(seen.has(p.id))return;seen.add(p.id);const s=byId(p.spouseId);
-   let m=[p];if(s&&g[s.id]===r&&!seen.has(s.id)&&s.spouseId===p.id){seen.add(s.id);const pHas=p.fatherId||p.motherId,sHas=s.fatherId||s.motherId;m=(!pHas&&sHas)?[s,p]:[p,s]}
-   us.push(m)});
-  us.forEach(u=>{const xs=[];u.forEach(p=>[p.fatherId,p.motherId].forEach(id=>{if(pos[id])xs.push(pos[id].x+NW/2)}));u.key=xs.length?xs.reduce((a,b)=>a+b)/xs.length:Infinity;
-   u.by=parseInt(u[0].birthYear)||9999});
-  us.sort((a,b)=>a.key===b.key?a.by-b.by:(a.key===Infinity?1:b.key===Infinity?-1:a.key-b.key));
-  let cursor=0;
-  us.forEach(u=>{const w=u.length*NW+(u.length-1)*GC;const want=u.key===Infinity?cursor:u.key-w/2;const x=Math.max(cursor,want);
-   u.forEach((p,i)=>pos[p.id]={x:x+i*(NW+GC),y:r*(NH+GY),row:r});cursor=x+w+GX;units.push(u)});
+ const inTree=id=>id&&byId(id);
+ const hasParents=p=>inTree(p.fatherId)||inTree(p.motherId);
+ const unitOf={},units=[];
+ const byBirth=(a,b)=>(parseInt(a.birthYear)||9999)-(parseInt(b.birthYear)||9999)||full(a).localeCompare(full(b));
+ people.slice().sort(byBirth).forEach(p=>{
+  if(unitOf[p.id])return;const s=byId(p.spouseId);let u;
+  if(s&&s.spouseId===p.id&&!unitOf[s.id]){
+   const pH=hasParents(p),sH=hasParents(s);
+   /* the couple sits with the partner whose own family is in the tree (more parents and siblings wins) */
+   const kin=x=>[x.fatherId,x.motherId].filter(inTree).length*10+people.filter(o=>o.id!==x.id&&((x.fatherId&&o.fatherId===x.fatherId)||(x.motherId&&o.motherId===x.motherId))).length;
+   const home=(pH&&!sH)?p:(sH&&!pH)?s:(pH&&sH)?(kin(s)>kin(p)?s:kin(p)>kin(s)?p:(p.gender==="m"?p:s.gender==="m"?s:p)):(p.gender==="m"?p:s.gender==="m"?s:p);
+   u={members:[home,home===p?s:p],home};
+  }else u={members:[p],home:p};
+  u.kids=[];u.members.forEach(m=>unitOf[m.id]=u);units.push(u);
  });
- // shift everything so the leftmost is at 0
- const minX=Math.min(...Object.values(pos).map(p=>p.x));Object.values(pos).forEach(p=>p.x-=minX);
- return{units,rows:rows.length};
+ // which unit does each unit hang under?
+ units.forEach(u=>{const h=u.home;const par=inTree(h.fatherId)?h.fatherId:inTree(h.motherId)?h.motherId:null;
+  u.parent=par?unitOf[par]:null;if(u.parent===u)u.parent=null});
+ // break any accidental loops
+ units.forEach(u=>{const seen=new Set([u]);let q=u.parent;while(q){if(seen.has(q)){u.parent=null;break}seen.add(q);q=q.parent}});
+ units.forEach(u=>{if(u.parent)u.parent.kids.push(u)});
+ units.forEach(u=>u.kids.sort((a,b)=>byBirth(a.home,b.home)));
+ const uw=u=>u.members.length*NW+(u.members.length-1)*GC;
+ const width=u=>{if(u.w!=null)return u.w;const kids=u.kids.reduce((t,k)=>t+width(k),0)+Math.max(0,u.kids.length-1)*GX;return u.w=Math.max(uw(u),kids)};
+ const place=(u,x0)=>{const W=width(u),y=g[u.home.id]*(NH+GY);u.x=x0+(W-uw(u))/2;u.y=y;
+  u.members.forEach((m,i)=>pos[m.id]={x:u.x+i*(NW+GC),y,row:g[u.home.id]});
+  const kidsW=u.kids.reduce((t,k)=>t+width(k),0)+Math.max(0,u.kids.length-1)*GX;let x=x0+(W-kidsW)/2;
+  u.kids.forEach(k=>{place(k,x);x+=width(k)+GX})};
+ // roots: biggest families first, then by generation
+ const size=u=>1+u.kids.reduce((t,k)=>t+size(k),0);
+ const roots=units.filter(u=>!u.parent).sort((a,b)=>g[a.home.id]-g[b.home.id]||size(b)-size(a)||byBirth(a.home,b.home));
+ /* a root whose children all married into another family is placed above those children afterwards */
+ const linkOnly=r=>!r.kids.length&&people.some(c=>r.members.some(m=>c.fatherId===m.id||c.motherId===m.id));
+ let cursor=0;roots.filter(r=>!linkOnly(r)).forEach(r=>{place(r,cursor);cursor+=width(r)+GX*2});
+ roots.filter(linkOnly).forEach(r=>{
+  const kidsX=people.filter(c=>pos[c.id]&&r.members.some(m=>c.fatherId===m.id||c.motherId===m.id)).map(c=>pos[c.id].x+NW/2);
+  const y=g[r.home.id]*(NH+GY),W=uw(r);let x=kidsX.reduce((a,b)=>a+b,0)/kidsX.length-W/2;
+  const busy=()=>Object.values(pos).some(q=>q.y===y&&q.x<x+W+GX/2&&x<q.x+NW+GX/2);
+  let tries=0;while(busy()&&tries++<80)x+=(tries%2?1:-1)*tries*(NW+GX)/2;
+  r.x=x;r.y=y;r.members.forEach((m,i)=>pos[m.id]={x:x+i*(NW+GC),y,row:g[r.home.id]})});
+ const minX=Math.min(...Object.values(pos).map(q=>q.x));if(minX<0)Object.values(pos).forEach(q=>q.x-=minX);
+ const rows=Math.max(...people.map(p=>g[p.id]))+1;
+ return{units,rows};
 }
 const SVGNS="http://www.w3.org/2000/svg";
 function el(tag,attrs,parent){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
@@ -465,15 +493,26 @@ function renderTree(){
  if(!people.length)return;
  const {units,rows}=layout(),w=$("world");w.innerHTML="";
  const edges=el("g",{},w),nodes=el("g",{},w);
- const coupleMid={};
- units.forEach(u=>{if(u.length===2){const a=pos[u[0].id],b=pos[u[1].id],y=a.y+NH/2;
-  el("line",{x1:a.x+NW,y1:y,x2:b.x,y2:y,class:"couple"},edges);const mx=(a.x+NW+b.x)/2;el("circle",{cx:mx,cy:y,r:7,class:"ring"},edges);
-  coupleMid[u[0].id+"|"+u[1].id]=coupleMid[u[1].id+"|"+u[0].id]={x:mx,y}}});
- people.forEach(c=>{const f=c.fatherId&&pos[c.fatherId],m=c.motherId&&pos[c.motherId];if(!f&&!m)return;
-  const pc=pos[c.id];let o;const cm=coupleMid[c.fatherId+"|"+c.motherId];
-  if(cm)o=cm;else{const pp=f||m;o={x:pp.x+NW/2,y:pp.y+NH}}
-  const cx=pc.x+NW/2,cy=pc.y,mid=cy-GY/2;
-  el("path",{d:`M${o.x},${o.y} V${mid} H${cx} V${cy}`,class:"edge"},edges)});
+ const mid=u=>{const a=pos[u.members[0].id],b=pos[u.members[1].id];return{x:(a.x+NW+b.x)/2,y:a.y+NH/2}};
+ units.forEach(u=>{if(u.members.length===2){const a=pos[u.members[0].id],b=pos[u.members[1].id],y=a.y+NH/2;
+  el("line",{x1:a.x+NW,y1:y,x2:b.x,y2:y,class:"couple"},edges)}});
+ const drawn=new Set();
+ // each family's own connecting line, under its own parents
+ units.forEach(P=>{if(!P.kids.length)return;const groups={};
+  P.kids.forEach(K=>{const c=K.home;const ids=P.members.map(m=>m.id);const both=P.members.length===2&&ids.includes(c.fatherId)&&ids.includes(c.motherId);
+   const parentIn=ids.filter(id=>id===c.fatherId||id===c.motherId);
+   const o=both?mid(P):(()=>{const q=pos[parentIn[0]];return{x:q.x+NW/2,y:q.y+NH}})();
+   const key=o.x+","+o.y;(groups[key]=groups[key]||{o,kids:[]}).kids.push(c);parentIn.forEach(id=>drawn.add(id+">"+c.id))});
+  Object.values(groups).forEach((G,gi)=>{const busY=P.y+NH+GY/2+(gi*10);
+   const xs=G.kids.map(c=>pos[c.id].x+NW/2).concat([G.o.x]);
+   el("path",{d:`M${G.o.x},${G.o.y} V${busY}`,class:"edge"},edges);
+   el("path",{d:`M${Math.min(...xs)},${busY} H${Math.max(...xs)}`,class:"edge"},edges);
+   G.kids.forEach(c=>{const q=pos[c.id];el("path",{d:`M${q.x+NW/2},${busY} V${q.y}`,class:"edge"},edges)})})});
+ units.forEach(u=>{if(u.members.length===2){const m=mid(u);el("circle",{cx:m.x,cy:m.y,r:7,class:"ring"},edges)}});
+ // links not shown by a family line (e.g. a spouse's own parents) as a dashed curve
+ people.forEach(c=>[c.fatherId,c.motherId].forEach(pid=>{if(!pid||!pos[pid]||drawn.has(pid+">"+c.id))return;
+  const a=pos[pid],b=pos[c.id],x1=a.x+NW/2,y1=a.y+NH,x2=b.x+NW/2,y2=b.y,dy=Math.max(60,(y2-y1)/2);
+  el("path",{d:`M${x1},${y1} C${x1},${y1+dy} ${x2},${y2-dy} ${x2},${y2}`,class:"edge link"},edges)}));
  people.forEach(p=>{const q=pos[p.id];const gN=el("g",{class:`node g-${p.gender||"u"}${p.deathYear?" gone":""}${hi===p.id?" hi":""}`,"data-id":p.id,transform:`translate(${q.x},${q.y})`},nodes);
   el("rect",{width:NW,height:NH,rx:18,class:"nbox"},gN);
   el("circle",{cx:NW/2,cy:42,r:31,class:"avc"},gN);
@@ -483,7 +522,7 @@ function renderTree(){
   const b=el("text",{x:NW/2,y:119,class:"n2"},gN);b.textContent=cut(p.lastName,17);
   const c=el("text",{x:NW/2,y:140,class:"n3"},gN);c.textContent=years(p);
   const ttl=el("title",{},gN);ttl.textContent=full(p)});
- const xs=Object.values(pos);bounds={x:0,y:0,w:Math.max(...xs.map(p=>p.x))+NW,h:(rows-1)*(NH+GY)+NH};
+ const xs=Object.values(pos);bounds={x:0,y:0,w:Math.max(...xs.map(p=>p.x))+NW,h:Math.max(...xs.map(p=>p.y))+NH};
  if(!fitted){fit();fitted=true}else applyView();
 }
 function applyView(){$("world").setAttribute("transform",`translate(${view.x},${view.y}) scale(${view.s})`)}
