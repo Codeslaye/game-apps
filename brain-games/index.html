@@ -220,6 +220,65 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 .sboard.won .stile span{background:var(--green);color:var(--surface);border-color:var(--green);box-shadow:none}
 @keyframes glow{50%{transform:scale(.9)}}
 @media (prefers-reduced-motion:reduce){.stile{transition:none}.stile.hint span{animation:none}}
+
+/* Dama: a wooden board (fixed wood colours in both themes) */
+.mini-dama{display:grid;grid-template-columns:repeat(4,38px);border:5px solid #5a3214;border-radius:6px;width:max-content}
+.mini-dama span{height:38px;background:linear-gradient(160deg,#eed6ab,#d8b37c);display:grid;place-items:center}
+.mini-dama span.k{background:linear-gradient(160deg,#8e5b2c,#683c1b)}
+.mini-dama i{width:28px;height:28px;border-radius:50%;display:block}
+.mini-dama i.d{background:radial-gradient(circle at 35% 30%,#7a3a22,#2a0d05)}.mini-dama i.l{background:radial-gradient(circle at 35% 30%,#fff8e6,#c8a06a)}
+.dm-opts{display:flex;flex-direction:column;gap:18px}
+.dm-row{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.check{display:flex;gap:12px;align-items:center;min-height:48px;font-size:1.05rem;cursor:pointer}
+.check input{width:28px;height:28px;accent-color:var(--green);flex:none}
+.dm-side{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:14px;border:3px solid var(--line);background:var(--surface);max-width:640px;margin:0 auto;width:100%;flex-wrap:wrap}
+.dm-side b{font-size:1.15rem}.dm-side .muted{margin-left:auto}
+.dm-side.turn{border-color:var(--green);background:var(--green-soft)}
+.swatch{width:30px;height:30px;border-radius:50%;flex:none}
+.swatch.pd{background:radial-gradient(circle at 35% 30%,var(--pd1),var(--pd2) 58%,var(--pd3))}
+.swatch.pl{background:radial-gradient(circle at 35% 30%,var(--pl1),var(--pl2) 55%,var(--pl3));box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.dframe{width:100%;max-width:640px;margin:0 auto;padding:clamp(10px,3.4%,22px);border-radius:16px;
+ background:repeating-linear-gradient(87deg,rgba(255,255,255,.06) 0 2px,transparent 2px 10px),repeating-linear-gradient(93deg,rgba(0,0,0,.14) 0 1px,transparent 1px 14px),linear-gradient(135deg,var(--fr1),var(--fr2) 45%,var(--fr3));
+ box-shadow:inset 0 2px 0 rgba(255,255,255,.16),inset 0 -4px 8px rgba(0,0,0,.45),0 12px 26px rgba(0,0,0,.28)}
+.dboard{position:relative;display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;max-width:100%;border-radius:6px;overflow:hidden;box-shadow:0 0 0 3px var(--fr3),inset 0 0 14px rgba(0,0,0,.35)}
+.dsq{border:0;padding:0;position:relative;border-radius:0;cursor:default}
+.dsq.dk{cursor:pointer}
+.dsq.lt{background:repeating-linear-gradient(calc(90deg + var(--a)),rgba(140,90,40,.13) 0 2px,transparent 2px 7px),repeating-linear-gradient(calc(84deg + var(--a)),rgba(255,255,255,.16) 0 1px,transparent 1px 12px),linear-gradient(160deg,var(--lt1),var(--lt2))}
+.dsq.dk{background:repeating-linear-gradient(calc(90deg + var(--a)),rgba(0,0,0,.22) 0 2px,transparent 2px 8px),repeating-linear-gradient(calc(96deg + var(--a)),rgba(255,210,150,.09) 0 1px,transparent 1px 13px),linear-gradient(160deg,var(--dk1),var(--dk2))}
+.dsq.last::before{content:"";position:absolute;inset:0;background:rgba(255,214,102,.3)}
+.dsq.hintsq::before{content:"";position:absolute;inset:5%;border:4px solid #ffd166;border-radius:8px;background:rgba(255,214,102,.18)}
+.dsq.target::after{content:"";position:absolute;left:50%;top:50%;width:32%;height:32%;transform:translate(-50%,-50%);border-radius:50%;background:#3fbf6e;box-shadow:0 0 0 5px rgba(63,191,110,.35)}
+.dsq:focus-visible{outline:3px solid #ffd166;outline-offset:-3px}
+.dlayer{position:absolute;inset:0;pointer-events:none}
+.dpc{position:absolute;width:12.5%;height:12.5%;display:grid;place-items:center;transition:left .28s ease,top .28s ease,opacity .3s}
+.dpc .disc{width:80%;height:80%;border-radius:50%;display:grid;place-items:center;position:relative}
+.dpc .disc::before{content:"";position:absolute;inset:15%;border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 3px,rgba(0,0,0,.11) 3px 4px)}
+.pd .disc{background:radial-gradient(circle at 35% 30%,var(--pd1),var(--pd2) 58%,var(--pd3));box-shadow:inset 0 0 0 3px rgba(255,255,255,.08),inset 0 -5px 8px rgba(0,0,0,.55),0 4px 6px rgba(0,0,0,.5)}
+.pl .disc{background:radial-gradient(circle at 35% 30%,var(--pl1),var(--pl2) 55%,var(--pl3));box-shadow:inset 0 0 0 3px rgba(120,80,30,.15),inset 0 -5px 8px rgba(120,80,30,.35),0 4px 6px rgba(0,0,0,.45)}
+.crown{width:56%;height:56%;color:#e8b53e;display:none;position:relative;z-index:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
+.crown svg{width:100%;height:100%;display:block}
+.pl .crown{color:#9a6a17;filter:none}
+.king .crown{display:block}
+.sel .disc{outline:4px solid #ffd166;outline-offset:3px}
+.dpc.gone{opacity:.25}
+.cap{position:absolute;inset:0;display:none}.cap svg{width:100%;height:100%;display:block}
+.caps .cap{display:block}
+.caps .dpc .disc{background:none;box-shadow:0 3px 5px rgba(0,0,0,.45)}
+.caps .dpc .disc::before{display:none}
+.caps .king .crown,.caps .king .crown svg{color:#ffd166}
+.caps .king .crown{background:rgba(0,0,0,.6);border-radius:50%;padding:7%;width:50%;height:50%;box-sizing:border-box}
+.capsmode .swatch{background:none!important;box-shadow:none!important}.capsmode .swatch svg{width:100%;height:100%;display:block}
+#v-dama{--pd1:#7a3a22;--pd2:#45190b;--pd3:#2a0d05;--pl1:#fff8e6;--pl2:#f0dcb2;--pl3:#c8a06a;--lt1:#eed6ab;--lt2:#d8b37c;--dk1:#8e5b2c;--dk2:#683c1b;--fr1:#4a2810;--fr2:#6e3f1c;--fr3:#3b1f0b}
+.dm-choices{display:flex;flex-wrap:wrap;gap:10px}
+.dmc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 12px;border-radius:14px;border:3px solid var(--line);background:var(--surface);min-width:104px;max-width:150px;text-align:center}
+.dmc[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.dmc .lb{font-size:.9rem;font-weight:700;line-height:1.25}
+.dmc .pv{display:flex;gap:4px;align-items:center;justify-content:center;min-height:54px}
+.dmc .pv i{width:34px;height:34px;border-radius:50%;display:block;box-shadow:0 2px 3px rgba(0,0,0,.35)}
+.dmc .mb{display:grid;grid-template-columns:repeat(2,24px);border:5px solid;border-radius:4px}.dmc .mb s{height:24px;display:block}
+.dmc .cp{width:54px;height:54px;display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}.dmc .cp svg{width:100%;height:100%}
+.dm-rules{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;font-size:1.02rem}
+@media (prefers-reduced-motion:reduce){.dpc{transition:none}}
 /* Cheer */
 #cheer{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 70%,transparent)}
 #cheer canvas{position:absolute;inset:0;width:100%;height:100%}
@@ -287,6 +346,13 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
         <h2 data-t="slTitle"></h2>
         <div class="muted" data-t="slDesc"></div>
         <div class="status" id="slStatus"></div>
+        <div class="go" data-t="play"></div>
+      </button>
+      <button class="game-card" type="button" id="goDama">
+        <div class="mini-dama" aria-hidden="true"><span class="k"><i class="l"></i></span><span></span><span class="k"></span><span></span><span></span><span class="k"><i class="l"></i></span><span></span><span class="k"></span><span class="k"></span><span></span><span class="k"><i class="d"></i></span><span></span><span></span><span class="k"><i class="d"></i></span><span></span><span class="k"><i class="d"></i></span></div>
+        <h2 data-t="dmTitle"></h2>
+        <div class="muted" data-t="dmDesc"></div>
+        <div class="status" id="dmHomeStatus"></div>
         <div class="go" data-t="play"></div>
       </button>
     </div>
@@ -437,6 +503,39 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
     <div class="muted small" data-t="slHow"></div>
   </section>
 
+  <!-- DAMA -->
+  <section class="view" id="v-dama" hidden>
+    <div class="bar"><button class="btn ghost" type="button" data-home data-t="home"></button><span class="muted small" id="dmLevelTag"></span></div>
+    <h2 data-t="dmTitle"></h2>
+    <div class="panel dm-opts" id="dmSetup">
+      <div class="seg" id="dmMode"><button type="button" data-m="cpu" data-t="dmVsCpu"></button><button type="button" data-m="two" data-t="dmTwo"></button></div>
+      <div class="dm-row" id="dmLevelRow"><b data-t="dmLevelL"></b><div class="seg" id="dmLevel"><button type="button" data-l="easy" data-t="dm_easy"></button><button type="button" data-l="medium" data-t="dm_medium"></button><button type="button" data-l="hard" data-t="dm_hard"></button></div></div>
+      <div class="dm-row" id="dmP2Row" hidden><b data-t="dmP2L"></b><div class="seg" id="dmP2"></div></div>
+      <div class="muted" id="dmYou"></div>
+      <div class="dm-row"><b data-t="dmPiecesL"></b><div class="seg" id="dmPieces"><button type="button" data-p="wood" data-t="dmWood"></button><button type="button" data-p="caps" data-t="dmCaps"></button></div></div>
+      <div class="dm-row" id="dmWoodRow"><b data-t="dmWoodL"></b><div class="dm-choices" id="dmWoods"></div></div>
+      <div class="dm-row" id="dmCapRow" hidden><b id="dmCapDL"></b><div class="dm-choices" id="dmCapsD"></div><b id="dmCapLL"></b><div class="dm-choices" id="dmCapsL"></div></div>
+      <div class="dm-row"><b data-t="dmBoardL"></b><div class="dm-choices" id="dmBoards"></div></div>
+      <div class="dm-row"><b data-t="dmRulesL"></b><ul class="dm-rules"><li data-t="dmR1"></li><li data-t="dmR2"></li><li data-t="dmR3"></li><li data-t="dmR4"></li></ul></div>
+      <div class="actions" style="justify-content:flex-start"><button class="btn primary" type="button" id="dmStartBtn" data-t="dmStart"></button><button class="btn gold" type="button" id="dmResume" data-t="dmResume"></button></div>
+    </div>
+    <div class="view" id="dmPlay" hidden>
+      <div class="dm-side" id="dmSideL"><span class="swatch pl"></span><b id="dmNameL"></b><span class="muted small"><span data-t="dmCaptured"></span>: <b id="dmCapL">0</b></span></div>
+      <div class="dframe"><div class="dboard" id="dmBoard"></div></div>
+      <div class="dm-side" id="dmSideD"><span class="swatch pd"></span><b id="dmNameD"></b><span class="muted small"><span data-t="dmCaptured"></span>: <b id="dmCapD">0</b></span></div>
+      <div class="feedback" id="dmStatus" aria-live="polite" style="text-align:center;font-size:1.3rem"></div>
+      <div class="muted" id="dmMsg" style="text-align:center;min-height:1.4em"></div>
+      <div class="panel result" id="dmOver" hidden><div class="actions"><button class="btn primary" type="button" id="dmAgain" data-t="dmAgain"></button><button class="btn ghost" type="button" id="dmChange" data-t="dmChange"></button></div></div>
+      <div class="actions">
+        <button class="btn gold" type="button" id="dmHint" data-t="hint"></button>
+        <button class="btn ghost" type="button" id="dmUndo" data-t="dmUndo"></button>
+        <button class="btn ghost" type="button" id="dmSettingsBtn" data-t="dmSettings"></button>
+        <button class="btn ghost" type="button" id="dmNew"></button>
+      </div>
+      <div class="muted small" data-t="dmHow"></div>
+    </div>
+  </section>
+
   <!-- SCORES -->
   <section class="view" id="v-scores" hidden>
     <div class="bar">
@@ -483,6 +582,21 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 /* ================= text ================= */
 const T={
  en:{
+  dmWoodL:"Wood for the pieces",dmBoardL:"Board",dmBottom:n=>`Bottom pieces (${n})`,dmTop:n=>`Top pieces (${n})`,
+  dmR1:"Ordinary pieces move and capture forward only.",dmR2:"If an ordinary piece can capture, you must capture.",
+  dmR3:"A king (ንጉሥ) moves one square diagonally, forward or backward, and captures by jumping the piece next to it. It can keep jumping only while it is capturing. A king's capture is optional.",
+  dmR4:"An ordinary piece cannot capture a king. Only a king can capture a king.",
+  dmTitle:"Dama (Checkers)",dmDesc:"Classic checkers on a wooden board. Play against the iPad or with someone sitting next to you.",
+  dmVsCpu:"Against the iPad",dmTwo:"Two players",dm_easy:"Easy",dm_medium:"Medium",dm_hard:"Hard",dmLevelL:"How strong should the iPad play?",dmP2L:"Who is the second player?",
+  dmYouPlay:n=>`${n} plays the pieces at the bottom and moves first.`,dmStart:"Start game",dmResume:"Continue the game",dmRulesL:"Rules",
+  dmRForced:"Capturing is required when possible",dmRBack:"Ordinary pieces may also capture backward",dmRFly:"Kings move any distance along a diagonal",dmRulesNote:"Rule changes start with the next new game.",
+  dmPiecesL:"Pieces",dmWood:"Wooden",dmCaps:"Bottle caps",dmIpad:"iPad",dmTurn:n=>`${n}'s turn`,dmThinking:"The iPad is thinking…",
+  dmMustJump:"A capture is available, so you must jump.",dmNoMove:"That piece can't move right now.",dmMore:"Keep jumping with the same piece.",dmUndo:"Undo",
+  dmHintMsg:"Try moving the highlighted piece to the highlighted square.",dmNew:"New game",dmNewC:"Tap again to end this game",dmSettings:"Settings",
+  dmWin:n=>`${n} wins!`,dmLose:"The iPad won this time. Try again!",dmDraw:"It's a draw.",dmAgain:"Play again",dmChange:"Change players or settings",dmCaptured:"Captured",
+  dmHow:"Tap one of your pieces, then tap a square with a green dot. Jump over an opponent's piece to capture it; you can jump several in a row. A piece that reaches the far side becomes a king (ንጉሥ) and can move one square forward or backward.",
+  dmHomeGo:"Game in progress, pick up where you left off",dmHomeNew:"Against the iPad or two players",dama:"Dama wins",
+  histDama:k=>k==="draw"?"Dama · draw":k==="two"?"Dama · won a two-player game":`Dama · beat the iPad (${({easy:"Easy",medium:"Medium",hard:"Hard"})[k]})`,
   slTitle:"Fidel Chart Puzzle",slDesc:"Slide the letters back into the order of the fidel chart (ሀ ሁ ሂ ሃ ሄ ህ ሆ), one letter family per row.",
   slStatus:(l,r,c)=>`Level ${l} · ${r} × ${c} board`,slMovesL:"Moves",slRight:"In place",slUndo:"Undo",slPeek:"Show the finished chart",slUnpeek:"Back to my puzzle",
   slRestart:"Start this level again",slRestartC:"Tap again to start over",
@@ -530,6 +644,21 @@ const T={
   lastBackup:d=>`Last backup: ${d}`,noBackup:"No backup saved yet.",
   greet:["Good morning","Good afternoon","Good evening"],cur:"Level"},
  am:{
+  dmWoodL:"የጠጠሮቹ እንጨት",dmBoardL:"ሰሌዳ",dmBottom:n=>`የታችኛው ወገን (${n})`,dmTop:n=>`የላይኛው ወገን (${n})`,
+  dmR1:"ተራ ጠጠሮች ወደ ፊት ብቻ ይሄዳሉ፤ የሚበሉትም ወደ ፊት ብቻ ነው።",dmR2:"ተራ ጠጠር መብላት ከቻለ መብላት ግዴታ ነው።",
+  dmR3:"ንጉሥ ወደ ፊትም ወደ ኋላም አንድ ቤት በሰያፍ ይሄዳል፤ የሚበላው አጠገቡ ያለውን ጠጠር ዘሎ ነው። መዝለሉን የሚቀጥለው እየበላ ብቻ ነው። የንጉሥ መብላት በምርጫ ነው።",
+  dmR4:"ተራ ጠጠር ንጉሥን መብላት አይችልም። ንጉሥን የሚበላው ንጉሥ ብቻ ነው።",
+  dmTitle:"ዳማ",dmDesc:"በእንጨት ሰሌዳ ላይ የሚጫወቱት ዳማ። ከአይፓዱ ጋር ወይም ከአጠገብዎ ካለ ሰው ጋር ይጫወቱ።",
+  dmVsCpu:"ከአይፓዱ ጋር",dmTwo:"ሁለት ተጫዋቾች",dm_easy:"ቀላል",dm_medium:"መካከለኛ",dm_hard:"ከባድ",dmLevelL:"አይፓዱ ምን ያህል ጠንክሮ ይጫወት?",dmP2L:"ሁለተኛው ተጫዋች ማን ነው?",
+  dmYouPlay:n=>`${n}፦ የታችኛው ወገን ጠጠሮች፤ መጀመሪያ ይጫወታሉ።`,dmStart:"ጨዋታ ጀምር",dmResume:"ጨዋታውን ቀጥሉ",dmRulesL:"ደንቦች",
+  dmRForced:"የሚበላ ካለ መብላት ግዴታ ነው",dmRBack:"ተራ ጠጠሮች ወደ ኋላም መብላት ይችላሉ",dmRFly:"ንጉሥ በመስመሩ ላይ በፈለገው ርቀት ይሄዳል",dmRulesNote:"የደንብ ለውጦች በሚቀጥለው አዲስ ጨዋታ ይጀምራሉ።",
+  dmPiecesL:"ጠጠሮች",dmWood:"የእንጨት",dmCaps:"የጠርሙስ ክዳን",dmIpad:"አይፓድ",dmTurn:n=>`የ${n} ተራ`,dmThinking:"አይፓዱ እያሰበ ነው…",
+  dmMustJump:"የሚበላ ጠጠር ስላለ መብላት አለብዎት።",dmNoMove:"ይህ ጠጠር አሁን መንቀሳቀስ አይችልም።",dmMore:"በዚያው ጠጠር መብላትዎን ይቀጥሉ።",dmUndo:"ወደ ኋላ",
+  dmHintMsg:"የደመቀውን ጠጠር ወደ ደመቀው ቦታ ያንቀሳቅሱ።",dmNew:"አዲስ ጨዋታ",dmNewC:"ጨዋታውን ለመጨረስ እንደገና ይንኩ",dmSettings:"ቅንብሮች",
+  dmWin:n=>`አሸናፊ፦ ${n}!`,dmLose:"በዚህ ጊዜ አይፓዱ አሸነፈ። እንደገና ይሞክሩ!",dmDraw:"አቻ ወጣ።",dmAgain:"እንደገና ተጫወቱ",dmChange:"ተጫዋቾችን ወይም ቅንብሮችን ቀይሩ",dmCaptured:"የተበሉ",
+  dmHow:"ከጠጠሮችዎ አንዱን ይንኩ፣ ከዚያ አረንጓዴ ነጥብ ያለበትን ቦታ ይንኩ። የተቃዋሚውን ጠጠር ዘለው ይበሉታል፤ በተከታታይ ብዙ መብላትም ይቻላል። ሌላው ጫፍ የደረሰ ጠጠር ንጉሥ ይሆናል፤ ወደ ፊትም ወደ ኋላም አንድ ቤት ይሄዳል።",
+  dmHomeGo:"ያልተጨረሰ ጨዋታ፤ ካቆማችሁበት ቀጥሉ",dmHomeNew:"ከአይፓዱ ጋር ወይም ሁለት ተጫዋቾች",dama:"የዳማ ድሎች",
+  histDama:k=>k==="draw"?"ዳማ · አቻ":k==="two"?"ዳማ · የሁለት ተጫዋቾች ጨዋታ አሸነፈ":`ዳማ · አይፓዱን አሸነፈ (${({easy:"ቀላል",medium:"መካከለኛ",hard:"ከባድ"})[k]})`,
   slTitle:"የፊደል ገበታ እንቆቅልሽ",slDesc:"ፊደሎቹን በማንሸራተት እንደ ፊደል ገበታው (ሀ ሁ ሂ ሃ ሄ ህ ሆ) በየረድፉ አስተካክሉ።",
   slStatus:(l,r,c)=>`ደረጃ ${l} · ${r} × ${c} ሰሌዳ`,slMovesL:"እንቅስቃሴዎች",slRight:"በቦታቸው",slUndo:"ወደ ኋላ",slPeek:"የተስተካከለውን ገበታ አሳይ",slUnpeek:"ወደ እንቆቅልሹ ተመለስ",
   slRestart:"ይህንን ደረጃ እንደገና ጀምር",slRestartC:"እንደገና ለመጀመር ይንኩ",
@@ -698,7 +827,7 @@ function streak(days){let n=0;const s=new Set(days);const d=new Date();if(!s.has
 
 /* ================= views ================= */
 let view="home";
-function show(v){view=v;["home","words","sudoku","scores","quiz","slide"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
+function show(v){view=v;["home","words","sudoku","scores","quiz","slide","dama"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
 document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{show("home");renderHome()});
 $("langBtn").onclick=()=>{lang=lang==="en"?"am":"en";ls.set("lang",lang);renderAll()};
 $("goWords").onclick=()=>{show("words");renderWords()};
@@ -711,7 +840,7 @@ function renderAll(){
  $("langBtn").textContent=t("langBtn");
  const hr=new Date().getHours();$("greet").textContent=t("greet")[hr<12?0:hr<17?1:2];
  renderHome();
- if(view==="words")renderWords();if(view==="sudoku")renderSudoku();if(view==="scores")renderScores();if(view==="quiz")renderQuiz();if(view==="slide")renderSlide();
+ if(view==="words")renderWords();if(view==="sudoku")renderSudoku();if(view==="scores")renderScores();if(view==="quiz")renderQuiz();if(view==="slide")renderSlide();if(view==="dama")renderDama();
 }
 function renderHome(){
  const box=$("players");box.innerHTML="";
@@ -726,6 +855,7 @@ function renderHome(){
  $("wStatus").textContent=T[lang].wStatus(wb.level,Math.min(wb.idx+1,spec.count),spec.count);
  $("sStatus").textContent=P().sd&&!P().sd.won?t("sStatusGo"):t("sStatusNew");
  $("homePts").textContent=P().st.points;
+ $("dmHomeStatus").textContent=P().dama&&!P().dama.over?t("dmHomeGo"):t("dmHomeNew");
  {const L=P().sl?P().sl.level:1,sp=slSpec(L);$("slStatus").textContent=T[lang].slStatus(L,sp.r,sp.c)}
 }
 let gArm=false;
@@ -904,13 +1034,13 @@ function renderScores(){
  $("scoreTitle").textContent=T[lang].scoreTitle(pname(cur));
  $("saveNote").textContent=t("savedLocal");
  const lb=ls.get("lastBackup",null);$("lastBackup").textContent=lb?T[lang].lastBackup(lb):t("noBackup");
- const tiles=[["total",st.points],["words",st.words],["levels",st.levels],["sudokus",st.sudokus],["qwins",st.qwins||0],["slides",st.slides||0],["streak",streak(st.days)]];
+ const tiles=[["total",st.points],["words",st.words],["levels",st.levels],["sudokus",st.sudokus],["qwins",st.qwins||0],["slides",st.slides||0],["dama",st.dama||0],["streak",streak(st.days)]];
  $("statTiles").innerHTML=tiles.map(([k,v])=>`<div class="stat"><span class="muted small">${esc(t(k))}</span><b>${v}</b></div>`).join("");
  const a=players[0].st.points,b=players[1].st.points;
  $("vs").innerHTML=[0,1].map(i=>{const pts=players[i].st.points,lead=pts>0&&pts===Math.max(a,b)&&a!==b;
   return `<div class="stat${lead?" lead":""}"><span class="small">${esc(pname(i))}${lead?" ★":""}</span><b>${pts}</b><span class="muted small">${esc(t("cur"))} ${players[i].wb.level} · ${players[i].st.sudokus} ${esc(t("sudokus").toLowerCase())}</span></div>`}).join("");
  $("guestLine").textContent=players[2].st.points>0?T[lang].guestLine(pname(2),players[2].st.points):"";
- $("hist").innerHTML=st.hist.length?st.hist.map(h=>{const txt=h.sl?T[lang].histSlide(h.sl):h.L?T[lang].histWords(h.L):h.w?T[lang].histSudoku(h.w):h.q?t("histQuiz"):h.txt;
+ $("hist").innerHTML=st.hist.length?st.hist.map(h=>{const txt=h.dm?T[lang].histDama(h.dm):h.sl?T[lang].histSlide(h.sl):h.L?T[lang].histWords(h.L):h.w?T[lang].histSudoku(h.w):h.q?t("histQuiz"):h.txt;
   return `<div><span><span class="muted small">${esc(h.d)}</span><br>${esc(txt)}</span><b>${esc(T[lang].pts(h.pts))}</b></div>`}).join(""):`<p class="muted">${esc(t("none"))}</p>`;
 }
 
@@ -1086,6 +1216,228 @@ $("slRestartBtn").onclick=()=>{if(!slRestartArm){slRestartArm=true;renderSlide()
 $("slNextBtn").onclick=()=>{newSlide(P().sl.level+1);$("sboard").dataset.sig="";window.scrollTo(0,0);renderSlide();requestAnimationFrame(renderSlide)};
 $("slReplayBtn").onclick=()=>{newSlide(P().sl.level);$("sboard").dataset.sig="";renderSlide();requestAnimationFrame(renderSlide)};
 window.addEventListener("resize",()=>{if(view==="slide")renderSlide()});
+
+/* ================= Dama (checkers) ================= */
+/* Board: 64 squares, index r*8+c; play squares are where (r+c) is odd. "d" = dark pieces (bottom, move first), "l" = light (top). */
+const DM_PTS={easy:20,medium:40,hard:70};
+let dmSel=null,dmSeqs=null,dmThinking=false,dmHintMove=null,dmArmNew=false,dmSetup={mode:"cpu",level:"easy",p2:null};
+function dmInitBoard(){const b=Array(64).fill(null);let id=0;
+ for(let r=0;r<8;r++)for(let c=0;c<8;c++){if((r+c)%2!==1)continue;if(r<3)b[r*8+c]={id:id++,c:"l",k:false};else if(r>4)b[r*8+c]={id:id++,c:"d",k:false}}
+ return b}
+const dmOpp=c=>c==="d"?"l":"d";
+/* Family rules: ordinary pieces move and capture forward only and can never capture a king;
+   kings move one square in any diagonal direction and capture by jumping an adjacent piece (forward or backward),
+   chaining jumps only while capturing; kings may capture kings;
+   when an ordinary piece can capture, the player must capture; a king's capture is optional. */
+const DM_RULES={family:true};
+const D4=[[1,1],[1,-1],[-1,1],[-1,-1]];
+/* All legal moves for a colour. A move = {from, path:[landing squares], caps:[captured squares]} */
+function dmMoves(b,col){
+ const manJumps=[],kingJumps=[],steps=[];
+ for(let i=0;i<64;i++){const p=b[i];if(!p||p.c!==col)continue;
+  const r=Math.floor(i/8),c=i%8,fwd=col==="d"?-1:1;
+  const free=x=>!b[x]||x===i; // the moving piece's own start square counts as empty
+  const on=(rr,cc)=>rr>=0&&rr<8&&cc>=0&&cc<8;
+  const out=p.k?kingJumps:manJumps;
+  const dfs=(pos,path,caps,king)=>{const pr=Math.floor(pos/8),pc=pos%8;let ext=false;
+   for(const[dr,dc]of(king?D4:[[fwd,1],[fwd,-1]])){
+    {const mr=pr+dr,mc=pc+dc,lr=pr+2*dr,lc=pc+2*dc;if(!on(lr,lc))continue;
+     const m=mr*8+mc,land=lr*8+lc,q=b[m];if(!q||q.c===col||(q.k&&!king)||caps.includes(m))continue;if(!free(land)||caps.includes(land))continue;
+     ext=true;const promo=!king&&lr===(col==="d"?0:7);
+     if(promo)out.push({from:i,path:path.concat(land),caps:caps.concat(m)});else dfs(land,path.concat(land),caps.concat(m),king)}}
+   if(!ext&&caps.length)out.push({from:i,path,caps})};
+  dfs(i,[],[],p.k);
+  for(const[dr,dc]of(p.k?D4:[[fwd,1],[fwd,-1]])){let rr=r+dr,cc=c+dc;
+   while(on(rr,cc)&&!b[rr*8+cc]){steps.push({from:i,path:[rr*8+cc],caps:[]});break}}
+ }
+ if(manJumps.length)return manJumps.concat(kingJumps);
+ return kingJumps.concat(steps);
+}
+function dmApply(b,mv){const nb=b.slice(),p={...nb[mv.from]};nb[mv.from]=null;mv.caps.forEach(x=>nb[x]=null);
+ const to=mv.path[mv.path.length-1];const r=Math.floor(to/8);if(!p.k&&((p.c==="d"&&r===0)||(p.c==="l"&&r===7)))p.k=true;nb[to]=p;return nb}
+/* evaluation from dark's point of view */
+function dmEval(b){let s=0;for(let i=0;i<64;i++){const p=b[i];if(!p)continue;const r=Math.floor(i/8),c=i%8;
+ let v=p.k?170:100;if(!p.k)v+=(p.c==="d"?(7-r):r)*4;if(c>=2&&c<=5&&r>=2&&r<=5)v+=6;if(!p.k&&((p.c==="d"&&r===7)||(p.c==="l"&&r===0)))v+=8;
+ s+=p.c==="d"?v:-v}return s}
+function dmSearch(b,col,depth,alpha,beta,rules){
+ const mv=dmMoves(b,col);if(!mv.length)return{score:col==="d"?-10000-depth:10000+depth};
+ if(depth===0)return{score:dmEval(b)};
+ let best=null;
+ if(col==="d"){let v=-Infinity;for(const m of mv){const s=dmSearch(dmApply(b,m),"l",depth-1,alpha,beta,rules).score;if(s>v){v=s;best=m}alpha=Math.max(alpha,v);if(alpha>=beta)break}return{score:v,move:best}}
+ let v=Infinity;for(const m of mv){const s=dmSearch(dmApply(b,m),"d",depth-1,alpha,beta,rules).score;if(s<v){v=s;best=m}beta=Math.min(beta,v);if(alpha>=beta)break}return{score:v,move:best};
+}
+function dmBest(b,col,level,rules){const mv=dmMoves(b,col);if(!mv.length)return null;
+ const cfg={easy:[1,.35],medium:[3,.1],hard:[6,0]}[level]||[3,.1];
+ if(Math.random()<cfg[1])return mv[Math.floor(Math.random()*mv.length)];
+ const sh=mv.slice().sort(()=>Math.random()-.5);// vary between equal moves
+ let best=null,bs=col==="d"?-Infinity:Infinity;
+ for(const m of sh){const s=dmSearch(dmApply(b,m),dmOpp(col),cfg[0]-1,-Infinity,Infinity,rules).score;if(col==="d"?s>bs:s<bs){bs=s;best=m}}
+ return best}
+
+function dmNames(){const g=P().dama;if(!g)return{d:pname(cur),l:t("dmIpad")};return{d:pname(g.p1),l:g.mode==="cpu"?t("dmIpad"):pname(g.p2)}}
+function dmStart(){
+ const rules=DM_RULES;
+ P().dama={mode:dmSetup.mode,level:dmSetup.level,p1:cur,p2:dmSetup.mode==="two"?dmSetup.p2:null,rules,board:dmInitBoard(),turn:"d",undo:[],moves:0,quiet:0,over:null,last:null,cap:{d:0,l:0}};
+ dmSel=null;dmSeqs=null;dmHintMove=null;save();
+}
+function dmLegal(){const g=P().dama;return dmMoves(g.board,g.turn,g.rules)}
+function dmHumanTurn(){const g=P().dama;return g&&!g.over&&(g.mode==="two"||g.turn==="d")}
+function dmTap(sq){
+ const g=P().dama;if(!dmHumanTurn()||dmThinking)return;
+ const piece=g.board[sq];
+ if(dmSel!=null&&dmSeqs){ // choosing a landing square
+  const step=dmSeqs[0].done;const opts=dmSeqs.filter(m=>m.path[step]===sq);
+  if(opts.length){
+   const rest=opts.filter(m=>m.path.length>step+1);
+   if(!rest.length||opts.some(m=>m.path.length===step+1)){dmCommit(opts.find(m=>m.path.length===step+1)||opts[0]);return}
+   dmSeqs=opts.map(m=>({...m,done:step+1}));g.partial={from:dmSel,to:sq,step:step+1};$("dmMsg").textContent=t("dmMore");renderDama();return}
+  if(dmSeqs[0].done>0)return; // in the middle of a multi-jump: must finish it
+ }
+ if(piece&&piece.c===g.turn){
+  const mine=dmLegal().filter(m=>m.from===sq);
+  if(!mine.length){const any=dmLegal();$("dmMsg").textContent=any.length&&any.every(m=>m.caps.length)?t("dmMustJump"):t("dmNoMove");dmSel=null;dmSeqs=null;renderDama();return}
+  dmSel=sq;dmSeqs=mine.map(m=>({...m,done:0}));g.partial=null;dmHintMove=null;$("dmMsg").textContent="";renderDama();return}
+ dmSel=null;dmSeqs=null;renderDama();
+}
+function dmCommit(mv){
+ const g=P().dama;g.undo.push({board:g.board,turn:g.turn,cap:{...g.cap},moves:g.moves,quiet:g.quiet,last:g.last});if(g.undo.length>60)g.undo.shift();
+ g.board=dmApply(g.board,mv);g.cap[g.turn]+=mv.caps.length;g.moves++;g.quiet=mv.caps.length?0:g.quiet+1;
+ g.last={from:mv.from,to:mv.path[mv.path.length-1],caps:mv.caps};g.turn=dmOpp(g.turn);g.partial=null;
+ dmSel=null;dmSeqs=null;dmHintMove=null;$("dmMsg").textContent="";
+ dmCheckEnd();save();renderDama();
+ if(!g.over&&g.mode==="cpu"&&g.turn==="l")dmCpu();
+}
+function dmCpu(){const g=P().dama;dmThinking=true;renderDama();
+ setTimeout(()=>{const mv=dmBest(g.board,"l",g.level,g.rules);dmThinking=false;
+  if(!mv){dmCheckEnd();save();renderDama();return}
+  g.board=dmApply(g.board,mv);g.cap.l+=mv.caps.length;g.moves++;g.quiet=mv.caps.length?0:g.quiet+1;
+  g.last={from:mv.from,to:mv.path[mv.path.length-1],caps:mv.caps};g.turn="d";dmCheckEnd();save();renderDama()},450)}
+function dmCheckEnd(){
+ const g=P().dama;if(g.over)return;
+ if(!dmMoves(g.board,g.turn,g.rules).length){g.over=dmOpp(g.turn)}
+ else if(g.quiet>=80)g.over="draw";
+ if(!g.over)return;
+ const n=dmNames();
+ if(g.over==="draw"){const d=dayStr();P().st.hist.unshift({d,txt:"dama",dm:"draw",pts:0});P().st.hist=P().st.hist.slice(0,30);save();return}
+ let pts=0,who=null;
+ if(g.mode==="cpu"){if(g.over==="d"){pts=DM_PTS[g.level]||30;who=g.p1}}
+ else{pts=30;who=g.over==="d"?g.p1:g.p2}
+ if(who!=null){const st=players[who].st;st.points+=pts;st.dama=(st.dama||0)+1;const d=dayStr();if(!st.days.includes(d))st.days.push(d);
+  st.hist.unshift({d,txt:"dama",dm:g.mode==="cpu"?g.level:"two",pts});st.hist=st.hist.slice(0,30);players[who].updatedAt=Date.now();ls.set("p"+who,players[who])}
+ const winner=g.over==="d"?n.d:n.l;
+ if(who!=null)setTimeout(()=>cheer(T[lang].dmWin(winner),pts,["ዳ","ማ","ን","ጉ","ሥ"]),600);
+}
+function renderDama(){
+ const g=P().dama,setup=dmForceSetup||!g||g.over==="quit";
+ $("dmSetup").hidden=!setup;$("dmPlay").hidden=setup;
+ if(setup){renderDmSetup();return}
+ const n=dmNames(),board=$("dmBoard");
+ const sty=dmStyle();
+ if(!board.dataset.built){board.innerHTML="";
+  for(let i=0;i<64;i++){const r=Math.floor(i/8),c=i%8,dark=(r+c)%2===1;const sq=document.createElement("button");sq.type="button";
+   sq.className="dsq "+(dark?"dk":"lt");sq.style.setProperty("--a",((i*37)%17-8)+"deg");sq.dataset.i=i;sq.tabIndex=dark?0:-1;
+   if(dark)sq.onclick=()=>dmTap(i);board.appendChild(sq)}
+  const layer=document.createElement("div");layer.className="dlayer";layer.id="dmLayer";board.appendChild(layer);board.dataset.built="1"}
+ const legal=dmHumanTurn()?dmLegal():[];
+ const targets=new Set();if(dmSeqs)dmSeqs.forEach(m=>{if(m.path[m.done]!=null)targets.add(m.path[m.done])});
+ const movable=new Set(legal.map(m=>m.from));
+ board.querySelectorAll(".dsq").forEach(sq=>{const i=+sq.dataset.i;sq.classList.toggle("target",targets.has(i));
+  sq.classList.toggle("last",!!g.last&&(g.last.from===i||g.last.to===i));sq.classList.toggle("hintsq",!!dmHintMove&&(dmHintMove.from===i||dmHintMove.path[0]===i))});
+ // pieces
+ const layer=$("dmLayer"),seen=new Set();
+ const shown=g.partial&&dmSeqs?(()=>{const b=g.board.slice();const p=b[dmSel];b[dmSel]=null;b[g.partial.to]=p;return{b,sel:g.partial.to}})():{b:g.board,sel:dmSel};
+ shown.b.forEach((p,i)=>{if(!p)return;seen.add(p.id);let e=layer.querySelector(`[data-id="${p.id}"]`);
+  if(!e){e=document.createElement("div");e.className="dpc";e.dataset.id=p.id;e.innerHTML=`<span class="disc"><span class="cap"></span><span class="crown" aria-hidden="true">${CROWN}</span></span>`;layer.appendChild(e)}
+  e.className="dpc "+(p.c==="d"?"pd":"pl")+(p.k?" king":"")+(shown.sel===i?" sel":"")+(movable.has(i)&&!dmSeqs?" can":"");
+  if(sty.pieces==="caps"){const br=p.c==="d"?sty.capD:sty.capL;if(e.dataset.brand!==br){e.querySelector(".cap").innerHTML=capSVG(br);e.dataset.brand=br}}
+  e.style.left=(i%8)*12.5+"%";e.style.top=Math.floor(i/8)*12.5+"%"});
+ layer.querySelectorAll(".dpc").forEach(e=>{if(!seen.has(+e.dataset.id))e.remove()});
+ // captured pieces shown as jumped during a partial multi-jump
+ if(g.partial&&dmSeqs){const caps=dmSeqs[0].caps.slice(0,dmSeqs[0].done);caps.forEach(x=>{const p=g.board[x];if(p){const e=layer.querySelector(`[data-id="${p.id}"]`);if(e)e.classList.add("gone")}})}
+ // side panel
+ $("dmNameD").textContent=n.d;$("dmNameL").textContent=n.l;
+ $("dmCapD").textContent=g.cap.d;$("dmCapL").textContent=g.cap.l;
+ $("dmSideD").classList.toggle("turn",!g.over&&g.turn==="d");$("dmSideL").classList.toggle("turn",!g.over&&g.turn==="l");
+ let status="";
+ if(g.over)status=g.over==="draw"?t("dmDraw"):(g.mode==="cpu"&&g.over==="l"?t("dmLose"):T[lang].dmWin(g.over==="d"?n.d:n.l));
+ else if(dmThinking)status=t("dmThinking");else status=T[lang].dmTurn(g.turn==="d"?n.d:n.l);
+ $("dmStatus").textContent=status;
+ $("dmUndo").disabled=!g.undo.length||dmThinking||!!g.over;$("dmHint").hidden=!!g.over;$("dmUndo").hidden=!!g.over;
+ $("dmHint").disabled=!dmHumanTurn()||dmThinking;
+ $("dmNew").textContent=dmArmNew?t("dmNewC"):t("dmNew");
+ $("dmLevelTag").textContent=g.mode==="cpu"?t("dmVsCpu")+" · "+t("dm_"+g.level):t("dmTwo");
+ $("dmOver").hidden=!g.over;
+}
+const CROWN='<svg viewBox="0 0 24 24"><path d="M3 18h18l-1.6-9-4.4 3.6L12 6l-3 6.6L4.6 9z" fill="currentColor"/><rect x="3" y="19.2" width="18" height="2.2" rx="1" fill="currentColor"/></svg>';
+let dmForceSetup=false;
+/* Look of the board and pieces */
+const DM_WOODS={rosewood:{pd:["#7a3a22","#45190b","#2a0d05"],pl:["#fff8e6","#f0dcb2","#c8a06a"],en:"Rosewood & maple",am:"ቀይ ቡናማ እና ፈዛዛ"},
+ ebony:{pd:["#55504b","#211e1b","#0b0a09"],pl:["#ffffff","#efe9dd","#c7bda9"],en:"Ebony & ash",am:"ጥቁር እና ነጭ"},
+ cherry:{pd:["#b4502f","#7c2a16","#4a1309"],pl:["#fff2c2","#f1d47a","#c9a243"],en:"Cherry & pine",am:"ቀይ እና ቢጫ"},
+ teak:{pd:["#a2723f","#6b4420","#3c240e"],pl:["#fffaf0","#eee1c5","#cbb88f"],en:"Teak & beech",am:"ቡናማ እና ክሬም"}};
+const DM_BOARDS={walnut:{lt:["#eed6ab","#d8b37c"],dk:["#8e5b2c","#683c1b"],fr:["#4a2810","#6e3f1c","#3b1f0b"],en:"Walnut & maple",am:"ጠቆር ያለ ቡናማ እና ፈዛዛ"},
+ mahogany:{lt:["#f5e8cf","#e3cba3"],dk:["#7f2f1f","#561a10"],fr:["#3a120a","#5e2414","#2c0d06"],en:"Mahogany & birch",am:"ቀይ ቡናማ እና ነጭ"},
+ olive:{lt:["#e8d6a6","#c9ad75"],dk:["#4d3c2a","#2c2117"],fr:["#2b2117","#4b3a28","#1d1610"],en:"Olive wood & ebony",am:"የወይራ እንጨት እና ጥቁር"}};
+const DM_CAPS={meta:{am:["ሜታ","ቢራ"],en:"Meta Beer",edge:"#4f0c1f",face:"#7a1430",acc:"#d4a537",txt:"#efcb64"},
+ giorgis:{am:["ቅዱስ ጊዮርጊስ","ቢራ"],en:"St. George Beer",edge:"#9c1219",face:"#c8202a",acc:"#f5c518",txt:"#ffd84a"},
+ coca:{am:["ኮካ","ኮላ"],en:"Coca-Cola",edge:"#a80d12",face:"#d7141a",acc:"#ffffff",txt:"#ffffff"},
+ pepsi:{am:["ፔፕሲ"],en:"Pepsi",edge:"#073472",face:"#0b4ea2",acc:"#e2242b",txt:"#0b4ea2",band:"#ffffff"},
+ mirinda:{am:["ሚሪንዳ"],en:"Mirinda",edge:"#c2500e",face:"#f26b1d",acc:"#2c9a3a",txt:"#ffffff"},
+ sprite:{am:["ስፕራይት"],en:"Sprite",edge:"#5e9e2f",face:"#7ac143",acc:"#ffffff",txt:"#ffffff"}};
+function dmStyle(){const st=ls.get("damaStyle",null)||{pieces:ls.get("damaPieces","wood"),wood:"rosewood",board:"walnut",capD:"giorgis",capL:"coca"};
+ if(!DM_WOODS[st.wood])st.wood="rosewood";if(!DM_BOARDS[st.board])st.board="walnut";if(!DM_CAPS[st.capD])st.capD="giorgis";if(!DM_CAPS[st.capL]||st.capL===st.capD)st.capL=Object.keys(DM_CAPS).find(k=>k!==st.capD);
+ return st}
+function dmSetStyle(patch){const st=Object.assign(dmStyle(),patch);ls.set("damaStyle",st);dmApplyStyle()}
+function capSVG(k){const c=DM_CAPS[k];let pts="";for(let i=0;i<48;i++){const a=i*Math.PI/24,r=i%2?44.5:50;pts+=(50+r*Math.cos(a)).toFixed(1)+","+(50+r*Math.sin(a)).toFixed(1)+" "}
+ const L=c.am,n=L.length,size=n===1?([...L[0]].length>4?17:22):15,gap=size+3,y0=50-(n-1)*gap/2;
+ const txt=L.map((w,i)=>{const len=[...w].length,fit=len>5?` textLength="62" lengthAdjust="spacingAndGlyphs"`:"";
+  return `<text x="50" y="${(y0+i*gap).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-family="'Fidel Serif','Kefa',serif" font-weight="700" font-size="${size}" fill="${c.txt}"${fit}>${w}</text>`}).join("");
+ const band=c.band?`<rect x="9" y="36" width="82" height="28" fill="${c.band}"/><rect x="9" y="62" width="82" height="4" fill="${c.acc}"/>`:"";
+ return `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="${pts}" fill="${c.edge}"/><circle cx="50" cy="50" r="42" fill="${c.face}"/>${band}<circle cx="50" cy="50" r="37" fill="none" stroke="${c.acc}" stroke-width="3"/>${txt}</svg>`}
+function dmApplyStyle(){const st=dmStyle(),v=$("v-dama"),w=DM_WOODS[st.wood],bd=DM_BOARDS[st.board];
+ [["pd",w.pd],["pl",w.pl]].forEach(([k,a])=>a.forEach((c,i)=>v.style.setProperty(`--${k}${i+1}`,c)));
+ bd.lt.forEach((c,i)=>v.style.setProperty(`--lt${i+1}`,c));bd.dk.forEach((c,i)=>v.style.setProperty(`--dk${i+1}`,c));bd.fr.forEach((c,i)=>v.style.setProperty(`--fr${i+1}`,c));
+ const caps=st.pieces==="caps";$("dmBoard").classList.toggle("caps",caps);$("dmPlay").classList.toggle("capsmode",caps);
+ $("dmSideD").querySelector(".swatch").innerHTML=caps?capSVG(st.capD):"";$("dmSideL").querySelector(".swatch").innerHTML=caps?capSVG(st.capL):"";
+ $("dmLayer")&&$("dmLayer").querySelectorAll(".dpc").forEach(e=>{e.dataset.brand=""})}
+function dmChoice(box,items,current,onPick){box.innerHTML="";items.forEach(([key,preview,label])=>{const b=document.createElement("button");b.type="button";b.className="dmc";
+ b.setAttribute("aria-pressed",String(key===current));b.innerHTML=`<span class="pv">${preview}</span><span class="lb"></span>`;b.querySelector(".lb").textContent=label;b.onclick=()=>onPick(key);box.appendChild(b)})}
+function dmRenderStyleChoices(){const st=dmStyle();
+ $("dmWoodRow").hidden=st.pieces!=="wood";$("dmCapRow").hidden=st.pieces!=="caps";
+ dmChoice($("dmWoods"),Object.entries(DM_WOODS).map(([k,w])=>[k,`<i style="background:radial-gradient(circle at 35% 30%,${w.pd[0]},${w.pd[1]} 58%,${w.pd[2]})"></i><i style="background:radial-gradient(circle at 35% 30%,${w.pl[0]},${w.pl[1]} 55%,${w.pl[2]})"></i>`,w[lang]]),st.wood,k=>{dmSetStyle({wood:k});dmRenderStyleChoices()});
+ dmChoice($("dmBoards"),Object.entries(DM_BOARDS).map(([k,b])=>[k,`<span class="mb" style="border-color:${b.fr[1]}"><s style="background:${b.lt[0]}"></s><s style="background:${b.dk[0]}"></s><s style="background:${b.dk[0]}"></s><s style="background:${b.lt[0]}"></s></span>`,b[lang]]),st.board,k=>{dmSetStyle({board:k});dmRenderStyleChoices()});
+ const capItems=Object.entries(DM_CAPS).map(([k,c])=>[k,`<span class="cp">${capSVG(k)}</span>`,c.am.join(" ")+(lang==="en"?" · "+c.en:"")]);
+ dmChoice($("dmCapsD"),capItems,st.capD,k=>{const p={capD:k};if(k===st.capL)p.capL=st.capD;dmSetStyle(p);dmRenderStyleChoices()});
+ dmChoice($("dmCapsL"),capItems,st.capL,k=>{const p={capL:k};if(k===st.capD)p.capD=st.capL;dmSetStyle(p);dmRenderStyleChoices()});
+ const g=P().dama,inGame=g&&!g.over&&g.over!=="quit";
+ const bottom=inGame?dmNames().d:pname(cur),top=inGame?dmNames().l:(dmSetup.mode==="cpu"?t("dmIpad"):pname(dmSetup.p2!=null?dmSetup.p2:[0,1,2].find(i=>i!==cur)));
+ $("dmCapDL").textContent=T[lang].dmBottom(bottom);$("dmCapLL").textContent=T[lang].dmTop(top);
+ document.querySelectorAll("#dmPieces button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===st.pieces)))}
+function renderDmSetup(){
+ document.querySelectorAll("#dmMode button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===dmSetup.mode)));
+ document.querySelectorAll("#dmLevel button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.l===dmSetup.level)));
+ $("dmLevelRow").hidden=dmSetup.mode!=="cpu";$("dmP2Row").hidden=dmSetup.mode!=="two";
+ const box=$("dmP2");box.innerHTML="";const others=[0,1,2].filter(i=>i!==cur);if(dmSetup.p2==null||dmSetup.p2===cur)dmSetup.p2=others[0];
+ others.forEach(i=>{const b=document.createElement("button");b.type="button";b.textContent=pname(i);b.setAttribute("aria-pressed",String(dmSetup.p2===i));b.onclick=()=>{dmSetup.p2=i;renderDmSetup()};box.appendChild(b)});
+ $("dmYou").textContent=T[lang].dmYouPlay(pname(cur));
+ dmRenderStyleChoices();
+ const g=P().dama;$("dmResume").hidden=!(g&&!g.over);
+}
+document.querySelectorAll("#dmMode button").forEach(b=>b.onclick=()=>{dmSetup.mode=b.dataset.m;renderDmSetup()});
+document.querySelectorAll("#dmLevel button").forEach(b=>b.onclick=()=>{dmSetup.level=b.dataset.l;renderDmSetup()});
+document.querySelectorAll("#dmPieces button").forEach(b=>b.onclick=()=>{dmSetStyle({pieces:b.dataset.p});dmRenderStyleChoices()});
+$("goDama").onclick=()=>{dmApplyStyle();const g=P().dama;dmForceSetup=!(g&&!g.over);dmSel=null;dmSeqs=null;show("dama");renderDama();if(g&&!g.over&&g.mode==="cpu"&&g.turn==="l"&&!dmThinking)dmCpu()};
+$("dmStartBtn").onclick=()=>{dmStart();dmForceSetup=false;renderDama()};
+$("dmResume").onclick=()=>{dmForceSetup=false;renderDama()};
+$("dmSettingsBtn").onclick=()=>{dmForceSetup=true;renderDama()};
+$("dmAgain").onclick=()=>{const g=P().dama;dmSetup={mode:g.mode,level:g.level,p2:g.p2};dmStart();renderDama()};
+$("dmChange").onclick=()=>{dmForceSetup=true;renderDama()};
+$("dmUndo").onclick=()=>{const g=P().dama;if(!g.undo.length||dmThinking)return;
+ const s=g.undo.pop();
+ Object.assign(g,{board:s.board,turn:s.turn,cap:s.cap,moves:s.moves,quiet:s.quiet,last:s.last,partial:null});dmSel=null;dmSeqs=null;save();renderDama()};
+$("dmHint").onclick=()=>{const g=P().dama;if(!dmHumanTurn())return;dmHintMove=dmSearch(g.board,g.turn,4,-Infinity,Infinity,g.rules).move||null;$("dmMsg").textContent=dmHintMove?t("dmHintMsg"):"";renderDama()};
+$("dmNew").onclick=()=>{if(!dmArmNew){dmArmNew=true;renderDama();setTimeout(()=>{dmArmNew=false;if(view==="dama")renderDama()},3000);return}
+ dmArmNew=false;dmForceSetup=true;P().dama.over=P().dama.over||"quit";save();renderDama()};
 
 /* ================= Cheer: solitaire-style bouncing fidel tiles ================= */
 let cheerRun=null;
