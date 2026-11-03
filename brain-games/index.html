@@ -240,8 +240,8 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 .dframe{width:100%;max-width:640px;margin:0 auto;padding:clamp(10px,3.4%,22px);border-radius:16px;
  background:repeating-linear-gradient(87deg,rgba(255,255,255,.06) 0 2px,transparent 2px 10px),repeating-linear-gradient(93deg,rgba(0,0,0,.14) 0 1px,transparent 1px 14px),linear-gradient(135deg,var(--fr1),var(--fr2) 45%,var(--fr3));
  box-shadow:inset 0 2px 0 rgba(255,255,255,.16),inset 0 -4px 8px rgba(0,0,0,.45),0 12px 26px rgba(0,0,0,.28)}
-.dboard{position:relative;display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;max-width:100%;border-radius:6px;overflow:hidden;box-shadow:0 0 0 3px var(--fr3),inset 0 0 14px rgba(0,0,0,.35)}
-.dsq{border:0;padding:0;margin:0;position:relative;border-radius:0;cursor:default;-webkit-appearance:none;appearance:none;display:block;width:100%;height:100%;min-width:0;min-height:0}
+.dboard{position:relative;display:block;width:100%;height:0;padding-top:100%;max-width:100%;border-radius:6px;overflow:hidden;box-shadow:0 0 0 3px var(--fr3),inset 0 0 14px rgba(0,0,0,.35)}
+.dsq{border:0;padding:0;margin:0;position:absolute;width:12.5%;height:12.5%;border-radius:0;cursor:default;-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box}
 .dsq.dk{cursor:pointer}
 /* wood grain: five fixed angles (no calc/var in gradient angles, which some iPad Safari versions drop) */
 .dsq.lt{background-color:var(--lt2);background-image:linear-gradient(160deg,var(--lt1),var(--lt2))}
@@ -1347,7 +1347,7 @@ function renderDama(){
  const sty=dmStyle();
  if(!board.dataset.built){board.innerHTML="";
   for(let i=0;i<64;i++){const r=Math.floor(i/8),c=i%8,dark=(r+c)%2===1;const sq=document.createElement("button");sq.type="button";
-   sq.className="dsq "+(dark?"dk":"lt")+" g"+((i*37+r*3)%5);sq.dataset.i=i;sq.tabIndex=dark?0:-1;
+   sq.className="dsq "+(dark?"dk":"lt")+" g"+((i*37+r*3)%5);sq.style.left=(c*12.5)+"%";sq.style.top=(r*12.5)+"%";sq.dataset.i=i;sq.tabIndex=dark?0:-1;
    if(dark)sq.onclick=()=>dmTap(i);board.appendChild(sq)}
   const layer=document.createElement("div");layer.className="dlayer";layer.id="dmLayer";board.appendChild(layer);board.dataset.built="1"}
  const legal=dmHumanTurn()?dmLegal():[];

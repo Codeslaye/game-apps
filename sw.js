@@ -1,5 +1,5 @@
 // Keeps the family apps working with no internet after the first visit.
-const CACHE = "family-apps-v4-2026-10-28";
+const CACHE = "family-apps-v5-2026-11-02";
 const FILES = ["./", "index.html", "icon-180.png", "brain-games/", "brain-games/index.html", "brain-games/manifest.webmanifest", "brain-games/icon-180.png", "brain-games/icon-512.png", "recipes/", "recipes/index.html", "recipes/manifest.webmanifest", "recipes/icon-180.png", "recipes/icon-512.png", "family-tree/", "family-tree/index.html", "family-tree/manifest.webmanifest", "family-tree/icon-180.png", "family-tree/icon-512.png", "bible/", "bible/index.html", "bible/manifest.webmanifest", "bible/icon-180.png", "bible/icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new URL(f, self.registration.scope).href))).then(() => self.skipWaiting()));
