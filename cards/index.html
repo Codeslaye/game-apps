@@ -171,6 +171,7 @@ button.meld{color:inherit;font:inherit}
 .hand{position:relative;display:flex;flex-wrap:wrap;gap:12px 8px;padding:18px 0 12px;min-height:120px}
 .hand .card{--cw:clamp(48px,7.2vw,72px);touch-action:none}
 .hand .card.dragging{opacity:.35}
+.hand .card.gebi::before{content:"ገቢ";position:absolute;right:4%;bottom:3%;font-family:var(--f-geez);font-size:calc(var(--cw) * .2);font-weight:700;color:#fff;background:#1e5e48;border-radius:6px;padding:1px 5px;line-height:1.3}
 .hand .card.gA::after,.hand .card.gB::after{content:"";position:absolute;left:-5px;right:-5px;bottom:-9px;height:5px;border-radius:3px;background:#2f9e5f}
 .hand .card.gB::after{background:#2c6fb7}
 .hand .card.gS::after{left:0}.hand .card.gE::after{right:0}
@@ -243,7 +244,7 @@ button.meld{color:inherit;font:inherit}
     <div id="seats"></div>
     <div class="stack" id="lvlRow"><b data-t="lvlL"></b><div class="seg" id="lvlSeg"><button type="button" data-l="easy" data-t="easy"></button><button type="button" data-l="medium" data-t="medium"></button><button type="button" data-l="hard" data-t="hard"></button></div></div>
     <div class="stack"><b data-t="skinL"></b><div class="skins" id="skins"></div></div>
-    <div class="stack"><b data-t="rulesL"></b><ul class="rules"><li data-t="r1"></li><li data-t="r2"></li><li data-t="r3"></li><li data-t="r4"></li><li data-t="r5"></li><li data-t="r6"></li></ul></div>
+    <div class="stack"><b data-t="rulesL"></b><ul class="rules"><li data-t="r1"></li><li data-t="r2"></li><li data-t="r3"></li><li data-t="r4"></li><li data-t="r5"></li><li data-t="r6"></li><li data-t="r7"></li></ul></div>
     <div class="row"><button class="btn primary" type="button" id="startBtn" data-t="start"></button><button class="btn gold" type="button" id="resumeBtn" data-t="resume"></button></div>
   </div>
 </section>
@@ -367,13 +368,13 @@ function kShuffle(a){a=a.slice();for(let n=0;n<3;n++)for(let i=a.length-1;i>0;i-
 const kRankVal=r=>r>=11?10:r;                 // same-rank groups: ace is 1, J/Q/K are 10
 const kRunVal=v=>v===14?11:v>=11?10:v;        // runs: ace low is 1, ace after the king (14) is 11
 /* Check a group. Returns {type,size,value,order:[ids],as:{jokerId:{r,s}}} or null */
-function kMeld(cards){
- if(!cards||cards.length<3||cards.length>4)return null;
+function kMeld(cards,ext){
+ if(!cards||cards.length<3||cards.length>(ext?14:4))return null;
  const real=cards.filter(c=>!c.j),jokers=cards.filter(c=>c.j);
  if(!real.length||jokers.length>real.length)return null;
- if(real.every(c=>c.r===real[0].r)&&new Set(real.map(c=>c.s)).size===real.length){
+ if(real.every(c=>c.r===real[0].r)&&new Set(real.map(c=>c.s)).size===real.length&&(cards.length<=4||(ext&&cards.length===5&&jokers.length))){
   const r=real[0].r,free=KSUITS.filter(s=>!real.some(c=>c.s===s)),as={};
-  jokers.forEach((j,i)=>as[j.id]={r,s:free[i]});
+  jokers.forEach((j,i)=>as[j.id]={r,s:free[i]||null});
   return{type:"set",size:cards.length,value:kRankVal(r)*cards.length,order:real.map(c=>c.id).concat(jokers.map(j=>j.id)),as};
  }
  if(!real.every(c=>c.s===real[0].s))return null;
@@ -452,6 +453,36 @@ function kJokerOptions(cards){const jokers=cards.filter(c=>c.j),real=cards.filte
     if(miss.length!==jokers.length)continue;const as={};jokers.forEach((j,i)=>as[j.id]={r:miss[i]===14?1:miss[i],s});push(as,value)}}}
  return out.sort((x,y)=>y.value-x.value)}
 
+/* ================= ገቢ (Valid Insertion) =================
+   tables: [owner][group][cards]; jokers already on the table should be passed as fixed cards (their declared value). */
+/* does a real card fit a group already on the table? */
+function kFits(c,tables){if(!c||c.j)return false;return tables.some(gs=>gs.some(g=>kMeld(g.concat([c]),true)))}
+/* split cards into any groups: Tris, Quatris, or 5 cards when a joker lengthens a Quatris */
+function kPartAny(cards){const n=cards.length;if(!n)return[];if(n<3)return null;
+ const gs=kGroups(cards);if(cards.some(c=>c.j)){for(let a=0;a<n;a++)for(let b=a+1;b<n;b++)for(let c=b+1;c<n;c++)for(let d=c+1;d<n;d++)for(let e=d+1;e<n;e++){
+  const five=[a,b,c,d,e];if(!five.some(i=>cards[i].j))continue;const m=kMeld(five.map(i=>cards[i]),true);if(m)gs.push({idx:five,mask:five.reduce((x,i)=>x|(1<<i),0),size:5,value:m.value})}}
+ const by=[...Array(n)].map(()=>[]);gs.forEach(g=>by[g.idx[0]].push(g));let found=null;
+ const dfs=(used,chosen)=>{if(found)return;let i=0;while(i<n&&used&(1<<i))i++;if(i===n){found=chosen.map(g=>g.idx.map(k=>cards[k]));return}
+  for(const g of by[i]){if(g.mask&used)continue;chosen.push(g);dfs(used|g.mask,chosen);chosen.pop();if(found)return}};
+ dfs(0,[]);return found}
+/* can these cards (the hand after the last discard) finish the game?
+   1) the normal win: 3 Tris + 1 Quatris counting own groups on the table;
+   2) with ገቢ: real cards inserted into anyone's groups, jokers only into own groups, the rest in any Tris/Quatris.
+   Returns {groups, ins:[{o,gi,id}], tables} (tables = the groups after insertion) or null */
+function kFinish(cards,tables,me,need){
+ const plain=kWin(cards,need,0);if(plain)return{groups:plain,ins:[],tables:null};
+ const slots=[];tables.forEach((gs,o)=>gs.forEach((g,gi)=>slots.push({o,gi,cards:g.slice()})));if(!slots.length)return null;
+ let found=null,nodes=0;
+ const leaf=(rest,ins)=>{if(!ins.some(x=>!x.j))return;const part=kPartAny(rest);if(part){const tb=tables.map(gs=>gs.map(g=>g.slice()));slots.forEach(sl=>tb[sl.o][sl.gi]=sl.cards.slice());found={groups:part,ins:ins.map(x=>({o:x.o,gi:x.gi,id:x.id})),tables:tb}}};
+ /* go through the cards; after a pass that inserted something, try the leftovers again (9♠ fits only once 10♠ is in) */
+ const rec=(list,i,rest,ins,moved)=>{if(found||++nodes>30000)return;
+  if(i===list.length){leaf(rest,ins);if(!found&&moved&&rest.length)rec(rest,0,[],ins,false);return}
+  const c=list[i];
+  for(const sl of slots){if(c.j&&sl.o!==me)continue;const nc=sl.cards.concat([c]),m=kMeld(nc,true);if(!m)continue;const old=sl.cards;sl.cards=m.order.map(id=>nc.find(x=>x.id===id));
+   ins.push({o:sl.o,gi:sl.gi,id:c.id,j:c.j});rec(list,i+1,rest,ins,true);ins.pop();sl.cards=old;if(found)return}
+  rec(list,i+1,rest.concat([c]),ins,moved)};
+ rec(cards,0,[],[],false);return found}
+
 (function(){
 const T={
  en:{app:"Card Games",langBtn:"አማርኛ",who:"Who is playing?",rename:"Change names",save:"Save",mom:"Mom",dad:"Dad",guest:"Guest",
@@ -465,7 +496,7 @@ const T={
   r2:"A Tris (ትሪስ) is 3 cards and a Quatris (ኳትሪስ) is 4: a run in one suit (3♠ 4♠ 5♠) or the same number in different suits (8♠ 8♥ 8♦).",
   r3:"Ace is 1 in A-2-3, A-2-3-4 and A-A-A, and 11 in Q-K-A and J-Q-K-A. J, Q and K are 10. A joker is worth the card it stands for.",
   r4:"Each turn: draw from the pile, then discard one card. To take the top discard instead, lay down Tris and Quatris (as many as you need, one of them using that card) that add up to 41 or more (“41 ውረድ”). If a group has a joker, you say which card it stands for. The groups stay face up, and after that you can take the discard any time.",
-  r5:"Win when your 13 cards make 3 Tris and 1 Quatris after your discard. If the card you pick up from the discard pile finishes your hand, you can win right away without laying down 41. Winning with a joker as the last discard is a Vice: double points.",r6:"Once you have laid down 41, if you hold the card a joker stands for in another player's group, you can swap your card for it and take the joker.",
+  r5:"Win when your 13 cards make 3 Tris and 1 Quatris after your discard. If the card you pick up from the discard pile finishes your hand, you can win right away without laying down 41. Winning with a joker as the last discard is a Vice: double points.",r7:"ገቢ (Valid Insertion): a card that fits a group already on the table, yours or anyone's, like 10♠ in front of J♠ Q♠ K♠ A♠. It has a ገቢ tag in your hand. Nobody may discard a ገቢ card unless it is the last card that finishes the game. When you finish, the app inserts all your ገቢ cards for you, and then your other cards can be any Tris and Quatris. A joker is never ገቢ; it can only lengthen your own groups.",r6:"Once you have laid down 41, if you hold the card a joker stands for in another player's group, you can swap your card for it and take the joker.",
   start:"Start the game",resume:"Continue the game",drawPile:"Draw pile",discardPile:"Discard pile",
   discardBtn:"Discard",show41:"Lay down 41",finish:"Finish the game",back:"Back",jokerQ:"What does the joker stand for?",totalL:v=>`Total: ${v} / 41`,skinL:"Card style",skTibeb:"Tibeb",skRed:"Classic red",skBlue:"Classic blue",skGold:"Gold",stCanWin:"This card finishes your hand! Pick the card to discard and tap Finish the game, or lay down 41.",eFinish:"That discard doesn't finish your hand. Pick another card.",ePickLast:"Pick the one card you will discard, then tap Finish the game.",swapHint:"One of your cards matches a joker on the table. Pick that card, then tap the group with the gold outline to take the joker.",swapped:"You took the joker!",logSwap:n=>`${n} swapped a card for a joker.`,putBack:"Put the card back",groupMe:"Group my cards",sortSuit:"Sort by suit",sortRank:"Sort by number",
   stDraw:n=>`${n}, your turn: draw from the pile, or take the top discard`,stPlay:n=>`${n}: pick one card and tap Discard`,stFirst:n=>`${n}: you are the dealer. Pick one card and tap Discard to start`,
@@ -474,7 +505,7 @@ const T={
   howPlay:"Drag a card to move it. Tap a card to pick it. A green or blue line appears under cards that make a Tris or Quatris side by side.",
   eNo41:"You can't make 41 with that card yet, so draw from the pile.",eSplit:"Those cards don't all fit into Tris and Quatris (at most one Quatris) with the new card.",
   eSum:v=>`Those groups add up to ${v}. You need 41 or more.`,eShowFirst:"Lay down your 41 first, or put the card back.",eSameCard:"You can't discard the card you just picked up.",
-  eOne:"Pick exactly one card to discard.",
+  eOne:"Pick exactly one card to discard.",eGebi:"That card is ገቢ (a Valid Insertion): it fits a group on the table. You can only discard it if it is your last card and finishes the game.",withGebi:"Finished with ገቢ (Valid Insertion): the inserted cards have a green outline.",
   grp:(t,q)=>`Side by side: ${t} Tris · ${q} Quatris`,grpNone:"",
   passTo:n=>`Pass the iPad to ${n}`,passSub:"Everyone else, please look away so the cards stay secret.",ready:"I'm ready",
   wins:n=>`${n} wins!`,vice:"Vice! Finished with a joker: double points.",ipadWins:n=>`${n} won this round.`,drawRound:"The cards ran out. No winner this round.",
@@ -498,7 +529,7 @@ const T={
   r2:"ትሪስ 3 ካርታ፣ ኳትሪስ ደግሞ 4 ካርታ ነው፦ አንድ ዓይነት ተከታታይ (3♠ 4♠ 5♠) ወይም የተለያየ ዓይነት ያላቸው ተመሳሳይ ቁጥሮች (8♠ 8♥ 8♦)።",
   r3:"ኤሲ በA-2-3፣ A-2-3-4 እና A-A-A ውስጥ 1፣ በQ-K-A እና J-Q-K-A ውስጥ 11 ነው። J፣ Q እና K 10 ናቸው። ጆከር የሚተካውን ካርታ ዋጋ ይይዛል።",
   r4:"በየተራው፦ ከክምሩ ይሳቡ፣ ከዚያ አንድ ካርታ ይጣሉ። በምትኩ የተጣለውን የላይኛውን ለማንሳት፣ አንዱ እሱን የሚጠቀም፣ ድምራቸው 41 እና ከዚያ በላይ የሆነ ትሪስ እና ኳትሪስ (የሚያስፈልገውን ያህል) ያውርዱ («41 ውረድ»)። ስብስቡ ጆከር ካለው፣ ጆከሩ የትኛውን ካርታ እንደሚወክል ይናገራሉ። ስብስቦቹ ተገልጠው ይቀመጣሉ፤ ከዚያ በኋላ የተጣለውን በፈለጉ ጊዜ ማንሳት ይችላሉ።",
-  r5:"ከጣሉ በኋላ 13ቱ ካርታዎችዎ 3 ትሪስ እና 1 ኳትሪስ ከሆኑ ያሸንፋሉ። ከተጣለው ያነሱት ካርታ እጅዎን ከጨረሰ፣ 41 ሳይወርዱ ወዲያውኑ ማሸነፍ ይችላሉ። በመጨረሻ ጆከር ጥለው ካሸነፉ ቫይስ ነው፤ ነጥቡ እጥፍ ይሆናል።",r6:"41 ካወረዱ በኋላ፣ በሌላ ተጫዋች ስብስብ ውስጥ ጆከሩ የሚወክለው ካርታ በእጅዎ ካለ፣ ካርታዎን ሰጥተው ጆከሩን መውሰድ ይችላሉ።",
+  r5:"ከጣሉ በኋላ 13ቱ ካርታዎችዎ 3 ትሪስ እና 1 ኳትሪስ ከሆኑ ያሸንፋሉ። ከተጣለው ያነሱት ካርታ እጅዎን ከጨረሰ፣ 41 ሳይወርዱ ወዲያውኑ ማሸነፍ ይችላሉ። በመጨረሻ ጆከር ጥለው ካሸነፉ ቫይስ ነው፤ ነጥቡ እጥፍ ይሆናል።",r7:"ገቢ፦ ጠረጴዛው ላይ ካለ ስብስብ (የእርስዎም ሆነ የሌላ) ጋር የሚገጥም ካርታ ነው፤ ለምሳሌ 10♠ ከJ♠ Q♠ K♠ A♠ በፊት። በእጅዎ ውስጥ «ገቢ» የሚል ምልክት አለው። ጨዋታውን የሚጨርስ የመጨረሻ ካርታ ካልሆነ በስተቀር ማንም ገቢ ካርታ መጣል አይችልም። ሲጨርሱ መተግበሪያው ገቢ ካርታዎችዎን ሁሉ ያስገባልዎታል፤ ከዚያ የቀሩት ካርታዎች ማንኛውም ትሪስ እና ኳትሪስ ሊሆኑ ይችላሉ። ጆከር ገቢ አይሆንም፤ የራስዎን ስብስብ ብቻ ያረዝማል።",r6:"41 ካወረዱ በኋላ፣ በሌላ ተጫዋች ስብስብ ውስጥ ጆከሩ የሚወክለው ካርታ በእጅዎ ካለ፣ ካርታዎን ሰጥተው ጆከሩን መውሰድ ይችላሉ።",
   start:"ጨዋታውን ጀምሩ",resume:"ጨዋታውን ቀጥሉ",drawPile:"ክምር",discardPile:"የተጣለ",
   discardBtn:"ጣል",show41:"41 ውረድ",finish:"ጨዋታውን ጨርስ",back:"ተመለስ",jokerQ:"ጆከሩ የትኛውን ካርታ ይወክላል?",totalL:v=>`ድምር፦ ${v} / 41`,skinL:"የካርታ ዓይነት",skTibeb:"ጥበብ",skRed:"ክላሲክ ቀይ",skBlue:"ክላሲክ ሰማያዊ",skGold:"ወርቃማ",stCanWin:"ይህ ካርታ እጅዎን ይጨርሳል! የሚጥሉትን ካርታ መርጠው «ጨዋታውን ጨርስ» ይንኩ፣ ወይም 41 ይውረዱ።",eFinish:"ይህን ቢጥሉ እጅዎ አያልቅም። ሌላ ካርታ ይምረጡ።",ePickLast:"የሚጥሉትን አንድ ካርታ መርጠው «ጨዋታውን ጨርስ» ይንኩ።",swapHint:"ከካርታዎችዎ አንዱ ጠረጴዛው ላይ ካለ ጆከር ጋር ይመሳሰላል። ያንን ካርታ መርጠው በወርቃማ መስመር የተከበበውን ስብስብ ይንኩ፤ ጆከሩን ይወስዳሉ።",swapped:"ጆከሩን ወሰዱ!",logSwap:n=>`${n} ካርታ ሰጥቶ ጆከር ወሰደ።`,putBack:"ካርታውን መልስ",groupMe:"ካርታዎቼን አደራጅ",sortSuit:"በዓይነት አስተካክል",sortRank:"በቁጥር አስተካክል",
   stDraw:n=>`${n}፣ የእርስዎ ተራ፦ ከክምሩ ይሳቡ ወይም የተጣለውን ያንሱ`,stPlay:n=>`${n}፦ አንድ ካርታ መርጠው «ጣል» ይንኩ`,stFirst:n=>`${n}፦ እርስዎ አዳይ ነዎት። ለመጀመር አንድ ካርታ መርጠው «ጣል» ይንኩ`,
@@ -507,7 +538,7 @@ const T={
   howPlay:"ካርታን ለማንቀሳቀስ ይጎትቱት። ለመምረጥ ይንኩት። ጎን ለጎን ትሪስ ወይም ኳትሪስ የሚሆኑ ካርታዎች ስር አረንጓዴ ወይም ሰማያዊ መስመር ይታያል።",
   eNo41:"በዚህ ካርታ ገና 41 ማድረግ አይችሉም፤ ከክምሩ ይሳቡ።",eSplit:"እነዚህ ካርታዎች ከአዲሱ ካርታ ጋር ሁሉም ትሪስ እና ኳትሪስ (ቢበዛ አንድ ኳትሪስ) አይሆኑም።",
   eSum:v=>`እነዚህ ስብስቦች ${v} ናቸው። 41 እና ከዚያ በላይ ያስፈልጋል።`,eShowFirst:"መጀመሪያ 41 ይውረዱ፣ ወይም ካርታውን ይመልሱ።",eSameCard:"አሁን ያነሱትን ካርታ መጣል አይቻልም።",
-  eOne:"ለመጣል አንድ ካርታ ብቻ ይምረጡ።",
+  eOne:"ለመጣል አንድ ካርታ ብቻ ይምረጡ።",eGebi:"ይህ ካርታ ገቢ ነው፤ ጠረጴዛው ላይ ካለ ስብስብ ጋር ይገጥማል። መጣል የሚቻለው ጨዋታውን የሚጨርስ የመጨረሻ ካርታ ሲሆን ብቻ ነው።",withGebi:"በገቢ ጨረሰ፤ የገቡት ካርታዎች በአረንጓዴ ተከብበዋል።",
   grp:(t,q)=>`ጎን ለጎን፦ ${t} ትሪስ · ${q} ኳትሪስ`,grpNone:"",
   passTo:n=>`አይፓዱን ለ${n} ይስጡ`,passSub:"ካርታው ሚስጥር እንዲሆን ሌሎቻችሁ ዞር በሉ።",ready:"ዝግጁ ነኝ",
   wins:n=>`አሸናፊ፦ ${n}!`,vice:"ቫይስ! በጆከር ጨረሰ፤ ነጥቡ እጥፍ ነው።",ipadWins:n=>`በዚህ ዙር ${n} አሸነፈ።`,drawRound:"ካርታው አለቀ። በዚህ ዙር አሸናፊ የለም።",
@@ -535,7 +566,7 @@ const saveP=i=>{players[i].updatedAt=Date.now();ls.set("p"+i,players[i])};
 const SYM={S:"♠",H:"♥",D:"♦",C:"♣"},RL=r=>({1:"A",11:"J",12:"Q",13:"K"})[r]||String(r);
 function cardEl(c,opts={}){const e=document.createElement(opts.button?"button":"div");if(opts.button)e.type="button";
  if(opts.back){e.className="card back";return e}
- if(c.j){e.className="card joker";e.innerHTML=`<span class="tl">JOKER</span><span class="mid">★</span>`+(opts.as?`<span class="as">= ${RL(opts.as.r)}${SYM[opts.as.s]}︎</span>`:"")}
+ if(c.j){e.className="card joker";e.innerHTML=`<span class="tl">JOKER</span><span class="mid">★</span>`+(opts.as?`<span class="as">= ${RL(opts.as.r)}${opts.as.s?SYM[opts.as.s]:""}︎</span>`:"")}
  else{e.className="card"+((c.s==="H"||c.s==="D")?" red":"");e.innerHTML=`<span class="tl">${RL(c.r)}<i>${SYM[c.s]}︎</i></span><span class="mid">${SYM[c.s]}︎</span>`}
  e.dataset.id=c.id;e.setAttribute("aria-label",c.j?"Joker":RL(c.r)+" "+({S:"spades",H:"hearts",D:"diamonds",C:"clubs"})[c.s]);return e}
 document.querySelectorAll(".fan").forEach(f=>{[{r:1,s:"S"},{r:13,s:"H"},{j:true},{r:7,s:"D"}].forEach(c=>f.appendChild(cardEl(c)))});
@@ -610,7 +641,7 @@ function actTake(){if(!G.discard.length)return false;G.pre={hand:G.hands[G.turn]
  G.phase=opened(G.turn)?"play":"show";if(G.phase==="play")G.log=L().logTakeO(seatName(G.turn));return true}
 function actPutBack(){if(!G.pre)return;G.hands[G.turn]=G.pre.hand;G.discard=G.pre.discard;G.pre=null;G.took=null;G.newId=null;G.phase="draw"}
 const jas=()=>G.jas||(G.jas={});
-function asOf(g,c){const info=kMeld(g);return jas()[c.id]||(info&&info.as[c.id])||null}
+function asOf(g,c){const info=kMeld(g,true);return jas()[c.id]||(info&&info.as[c.id])||null}
 function actShow(groups,asList){asList=asList||[];const ids=new Set([].concat(...groups).map(c=>c.id));G.hands[G.turn]=G.hands[G.turn].filter(c=>!ids.has(c.id));
  const order=(g,as)=>{const m=kMeld(g);as=as||m.as;Object.keys(as).forEach(k=>jas()[k]=as[k]);if(m.type==="set")return m.order.map(id=>g.find(c=>c.id===id));
   const rk=c=>c.j?as[c.id].r:c.r,hi=g.some(c=>rk(c)===13)&&g.some(c=>rk(c)===1);return g.slice().sort((x,y)=>{const u=rk(x)===1&&hi?14:rk(x),v=rk(y)===1&&hi?14:rk(y);return u-v})};
@@ -620,23 +651,33 @@ function swapsFor(me,c){if(!c||c.j||!opened(me))return[];const out=[];G.table.fo
 function actSwap(me,cid,sw){const g=G.table[sw.o][sw.gi],k=g.findIndex(x=>x.id===sw.jid),c=G.hands[me].find(x=>x.id===cid);if(k<0||!c)return false;
  const jk=g[k];g[k]=c;delete jas()[jk.id];G.hands[me]=G.hands[me].filter(x=>x.id!==cid).concat([jk]);G.newId=jk.id;G.log=L().logSwap(seatName(me));return true}
 /* discard; returns an error key, or null */
+/* the table with every declared joker fixed to the card it stands for */
+function fixedTables(){return G.table.map(gs=>gs.map(g=>g.map(c=>{if(!c.j)return c;const a=asOf(g,c);return a&&a.s?{id:c.id,r:a.r,s:a.s,j:false,fx:true}:c})))}
+function finishWith(rest,me){return kFinish(rest,fixedTables(),me,kNeed(G.table[me]))}
+const isGebi=c=>kFits(c,fixedTables());
+/* may this card be discarded? A ገቢ card only if it wins, or if every other card is ገቢ too */
+function gebiBlocked(c,me){if(!isGebi(c))return false;const h=G.hands[me];return h.some(x=>x.id!==c.id&&x.id!==G.took&&!isGebi(x))}
 function actDiscard(id){const me=G.turn,h=G.hands[me],c=h.find(x=>x.id===id);if(!c)return"eOne";
  if(G.took===id)return"eSameCard";const rest=h.filter(x=>x.id!==id);
- const win=kWin(rest,kNeed(G.table[me]),0);
+ const win=finishWith(rest,me);
  if(G.phase==="show"&&!win)return"eShowFirst";
+ if(!win&&gebiBlocked(c,me))return"eGebi";
  G.hands[me]=rest;G.discard.push(c);G.first=false;G.took=null;G.pre=null;G.newId=null;G.log=L().logDisc(seatName(me));
- if(win){endRound(me,!!c.j,win);return null}nextTurn();return null}
+ if(win){let ins=[];if(win.tables){const byId={};G.table.forEach(gs=>gs.forEach(g=>g.forEach(x=>byId[x.id]=x)));rest.forEach(x=>byId[x.id]=x);
+   G.table=win.tables.map(gs=>gs.map(g=>g.map(x=>byId[x.id]||x)));ins=win.ins.map(x=>x.id)}
+  G.hands[me]=[];endRound(me,!!c.j,win.groups,ins);return null}
+ nextTurn();return null}
 function nextTurn(){const n=G.seats.length;G.turn=(G.turn+1)%n;G.phase="draw";G.took=null;sel.clear();msg="";
  if(isHuman(G.turn)){G.handover=humans()>1&&G.turn!==G.lastHuman;G.lastHuman=G.turn}saveG()}
-function endRound(w,vice,groups){G.over={w,vice,groups:groups||null};G.phase="over";
+function endRound(w,vice,groups,ins){G.over={w,vice,groups:groups||null,ins:ins||[]};G.phase="over";
  G.seats.forEach((s,i)=>{if(s.kind==="cpu")return;const p=players[s.pid];p.kRounds=(p.kRounds||0)+1;const d=dayStr();if(!p.days.includes(d))p.days.push(d);
   if(i===w){const pts=vice?80:40;p.pts+=pts;p.kWins=(p.kWins||0)+1;if(vice)p.kVice=(p.kVice||0)+1;p.hist.unshift({d,v:vice?1:0,pts});p.hist=p.hist.slice(0,30)}saveP(s.pid)});
  saveG();if(w!=null&&isHuman(w))setTimeout(()=>cheer(L().wins(seatName(w)),vice?t("vice"):"",vice?80:40),600)}
 
 /* ---------- the iPad players ---------- */
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-function winDiscards(h,need,minSum,avoid){return h.filter(c=>c.id!==avoid&&kWin(h.filter(x=>x!==c),need,minSum))}
-function bestDiscard(h,need,lvl,avoid){const idx=h.map((c,i)=>i).filter(i=>h[i].id!==avoid);
+function winDiscards(h,need,minSum,avoid){const me=G.turn;return h.filter(c=>c.id!==avoid&&finishWith(h.filter(x=>x!==c),me))}
+function bestDiscard(h,need,lvl,avoid){let idx=h.map((c,i)=>i).filter(i=>h[i].id!==avoid);const ok=idx.filter(i=>!isGebi(h[i]));if(ok.length)idx=ok;
  const nonJ=idx.filter(i=>!h[i].j),pool=nonJ.length?nonJ:idx;
  if(lvl==="easy"&&Math.random()<.4)return h[pool[Math.floor(Math.random()*pool.length)]];
  let best=null,bs=-1;for(const i of pool){const s=kScore(h,need,i)+(lvl==="hard"?0:Math.random()*4);if(s>bs){bs=s;best=h[i]}}return best}
@@ -682,7 +723,7 @@ function render(){if(!G)return;const n=G.seats.length,V=viewer(),myTurn=isHuman(
  const swapTargets=myTurn&&G.phase==="play"?swapsFor(G.turn,selCard):[];
  const addRow=(label,groups,loose,o)=>{const row=document.createElement("div");row.className="owner-row";if(o!=null)row.dataset.o=o;const who=document.createElement("span");who.className="who";who.textContent=label;row.appendChild(who);
   groups.forEach((g,gi)=>{const sw=row.dataset.o!=null&&swapTargets.find(x=>x.o===+row.dataset.o&&x.gi===gi);const box=document.createElement(sw?"button":"div");if(sw)box.type="button";box.className="meld"+(sw?" can":"");
-   g.forEach(c=>box.appendChild(cardEl(c,{as:c.j?asOf(g,c):null})));if(sw)box.onclick=()=>tapSwap(sw);row.appendChild(box)});
+   g.forEach(c=>{const ce=cardEl(c,{as:c.j?asOf(g,c):null});if(G.phase==="over"&&G.over.ins&&G.over.ins.includes(c.id))ce.classList.add("newc");box.appendChild(ce)});if(sw)box.onclick=()=>tapSwap(sw);row.appendChild(box)});
   if(loose&&loose.length){const box=document.createElement("div");box.className="meld loose";loose.forEach(c=>box.appendChild(cardEl(c)));row.appendChild(box)}mb.appendChild(row)};
  for(let i=0;i<n;i++){
   if(G.phase==="over"){const groups=G.table[i].slice();let loose=[];
@@ -696,7 +737,7 @@ function render(){if(!G)return;const n=G.seats.length,V=viewer(),myTurn=isHuman(
  // hand
  const hand=$("hand");hand.innerHTML="";const h=(G.phase==="over"&&G.over.w===V)?[]:(G.hands[V]||[]);const groups=runsInRow(h),gcls={};
  groups.forEach(([s,len],k)=>{for(let j=0;j<len;j++)gcls[s+j]=(k%2?"gB":"gA")+(j===0?" gS":"")+(j===len-1?" gE":"")});
- h.forEach((c,i)=>{const b=cardEl(c,{button:true});if(sel.has(c.id))b.classList.add("sel");if(c.id===G.newId&&G.turn===V)b.classList.add("newc");if(gcls[i])gcls[i].split(" ").forEach(x=>b.classList.add(x));hand.appendChild(b)});
+ h.forEach((c,i)=>{const b=cardEl(c,{button:true});if(sel.has(c.id))b.classList.add("sel");if(c.id===G.newId&&G.turn===V)b.classList.add("newc");if(gcls[i])gcls[i].split(" ").forEach(x=>b.classList.add(x));if(G.phase!=="over"&&isGebi(c)){b.classList.add("gebi");b.title="ገቢ"}hand.appendChild(b)});
  const nt=groups.filter(g=>g[1]===3).length,nq=groups.filter(g=>g[1]===4).length;$("groupline").textContent=(nt||nq)?L().grp(nt,nq):"";
  // status, counter, message
  let st="";if(G.phase!=="over"){if(!isHuman(G.turn))st=L().stOther(seatName(G.turn));else if(G.phase==="draw")st=L().stDraw(seatName(G.turn));else if(G.phase==="show")st=canFinish()?t("stCanWin"):L().stShow(seatName(G.turn));else st=G.first?L().stFirst(seatName(G.turn)):L().stPlay(seatName(G.turn))}
@@ -707,14 +748,14 @@ function render(){if(!G)return;const n=G.seats.length,V=viewer(),myTurn=isHuman(
  // buttons
  const playing=myTurn&&(G.phase==="play"||G.phase==="show");
  $("discardBtn").hidden=G.phase==="over"||G.phase==="show"||!!pend;$("discardBtn").disabled=!(playing&&sel.size===1);
- $("showBtn").hidden=!(myTurn&&G.phase==="show")||!!pend;$("finishBtn").hidden=!(myTurn&&G.phase==="show"&&canFinish())||!!pend;$("showBtn").disabled=sel.size<6;
+ $("showBtn").hidden=!(myTurn&&G.phase==="show")||!!pend;$("finishBtn").hidden=!(myTurn&&G.phase==="show"&&canFinish())||!!pend;$("showBtn").disabled=sel.size<3;
  $("putBackBtn").hidden=!(myTurn&&G.took!=null&&G.pre&&G.phase==="show")||!!pend;renderJoker(myTurn);
  if(!msg&&myTurn&&G.phase==="play"&&opened(G.turn)&&!selCard&&G.hands[G.turn].some(c=>swapsFor(G.turn,c).length)){const m2=$("msg");m2.textContent=t("swapHint");m2.className="msg log"}
  $("groupBtn").hidden=G.phase==="over";$("sortBtn").hidden=G.phase==="over";
  $("sortBtn").textContent=(G.sortNext||"rank")==="suit"?t("sortSuit"):t("sortRank");
  $("howLine").textContent=t("howPlay");$("quitBtn").textContent=quitArm?t("quitC"):t("quit");
  $("overBox").hidden=G.phase!=="over";
- if(G.phase==="over"){const o=G.over;$("overTitle").textContent=o.w==null?t("drawRound"):(isHuman(o.w)?L().wins(seatName(o.w)):L().ipadWins(seatName(o.w)));$("overSub").textContent=o.vice?t("vice"):""}
+ if(G.phase==="over"){const o=G.over;$("overTitle").textContent=o.w==null?t("drawRound"):(isHuman(o.w)?L().wins(seatName(o.w)):L().ipadWins(seatName(o.w)));$("overSub").textContent=[o.ins&&o.ins.length?t("withGebi"):"",o.vice?t("vice"):""].filter(Boolean).join(" ")}
 }
 const say=(k,arg)=>{msg=typeof k==="function"?k:(arg!=null?L()[k](arg):t(k));msgErr=true;render()};
 function tapDiscardPile(){if(!(isHuman(G.turn)&&G.phase==="draw"&&!busy))return;const me=G.turn,top=G.discard[G.discard.length-1];
@@ -743,7 +784,7 @@ function renderJoker(myTurn){const box=$("jokerBox");if(!pend||!myTurn||G.phase!
  const bk=document.createElement("button");bk.type="button";bk.className="btn ghost";bk.textContent=t("back");bk.onclick=()=>{pend=null;render()};r.appendChild(ok);r.appendChild(bk);box.appendChild(r)}
 function canFinish(){const me=G.turn;return G.phase==="show"&&winDiscards(G.hands[me],kNeed(G.table[me]),0,G.took).length>0}
 $("finishBtn").onclick=()=>{if(sel.size!==1){say("ePickLast");return}const id=[...sel][0],me=G.turn;
- if(id===G.took){say("eSameCard");return}if(!kWin(G.hands[me].filter(c=>c.id!==id),kNeed(G.table[me]),0)){say("eFinish");return}
+ if(id===G.took){say("eSameCard");return}if(!finishWith(G.hands[me].filter(c=>c.id!==id),me)){say("eFinish");return}
  const err=actDiscard(id);if(err){say(err);return}sel.clear();msg="";render()};
 function tapSwap(sw){const me=G.turn,c=G.hands[me].find(x=>sel.has(x.id));if(!c||!actSwap(me,c.id,sw))return;sel.clear();msg=t("swapped");msgErr=false;saveG();render()}
 $("putBackBtn").onclick=()=>{pend=null;actPutBack();sel.clear();msg="";saveG();render()};
