@@ -147,6 +147,22 @@ button.card{cursor:pointer}
 button.meld{color:inherit;font:inherit}
 #jokerBox{border:2px solid var(--gold);background:var(--gold-soft);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
 .jrow{display:flex;flex-direction:column;gap:8px}.jrow .lbl{font-weight:700}
+.ring{position:relative;width:100%;max-width:600px;margin:0 auto}.ring::before{content:"";display:block;padding-top:100%}
+.ring .slot{position:absolute;margin:0;cursor:pointer}
+.ring .slot:disabled{cursor:default}
+.wot{position:absolute;left:20%;right:20%;top:20%;bottom:20%;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:8px;overflow:auto;padding:6px}
+.wot .card{--cw:56px}.wot.many .card{--cw:44px}.wot.lots .card{--cw:34px}
+.wot .empty{color:rgba(243,239,226,.75);font-weight:700;text-align:center}
+.card.pick{box-shadow:0 0 0 4px #ffd166,0 6px 12px rgba(0,0,0,.35);transform:translateY(-6px)}
+.card.hint{box-shadow:0 0 0 4px #3fbf6e,0 6px 12px rgba(0,0,0,.35)}
+.iplayers{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.mpile{display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:14px;background:rgba(0,0,0,.22);border:2px solid transparent;color:inherit;font:inherit;text-align:left}
+.mpile.turn{border-color:#ffd166;background:rgba(255,209,102,.18)}
+.mpile .card{--cw:46px}.mpile .nop{width:46px;height:65px;border-radius:6px;border:2px dashed rgba(255,255,255,.4)}
+.mpile b{font-size:1.05rem}.mpile .cnt{font-variant-numeric:tabular-nums;opacity:.9}
+.iwrap{display:flex;flex-direction:column;gap:16px}
+@media (orientation:landscape) and (min-width:900px){.iwrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start}.ring{max-width:none}}
+.idrawn{display:flex;align-items:center;gap:16px;min-height:60px}#iDrawn .card{--cw:84px}
 .felt{border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px;color:#f3efe2;
  background:radial-gradient(circle at 50% 35%,#2f7d4f,#226440 55%,#174a2f);box-shadow:inset 0 0 0 6px #6e3f1c,inset 0 0 0 9px #c2902a,inset 0 0 40px rgba(0,0,0,.35)}
 .opps{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
@@ -227,9 +243,13 @@ button.meld{color:inherit;font:inherit}
       <div class="fan" aria-hidden="true"></div>
       <h2 data-t="kTitle"></h2><span class="muted" data-t="kDesc"></span><span class="st" id="kStatus"></span><span class="go" data-t="play"></span>
     </button>
-    <button class="game" type="button" disabled>
+    <button class="game" type="button" id="goInjera">
       <div class="fan" aria-hidden="true"></div>
-      <h2 data-t="sekaTitle"></h2><span class="muted" data-t="sekaDesc"></span><span class="go" data-t="soon"></span>
+      <h2 data-t="iTitle"></h2><span class="muted" data-t="iDesc"></span><span class="st" id="iStatusHome"></span><span class="go" data-t="play"></span>
+    </button>
+    <button class="game" type="button" id="goSeka">
+      <div class="fan" aria-hidden="true"></div>
+      <h2 data-t="sekaTitle"></h2><span class="muted" data-t="sekaDesc"></span><span class="st" id="sStatus"></span><span class="go" data-t="play"></span>
     </button>
   </div>
   <button class="scorebtn" type="button" id="goScores"><span><span class="label" data-t="scores"></span><br><b id="homePts">0</b> <span data-t="points"></span></span><span style="font-weight:700;color:var(--green)" data-t="seeScores"></span></button>
@@ -237,14 +257,15 @@ button.meld{color:inherit;font:inherit}
 
 <section class="view" id="v-setup" hidden>
   <div class="bar"><button class="btn ghost" type="button" data-home data-t="home"></button></div>
-  <h2 data-t="kTitle"></h2>
+  <h2 id="setupTitle"></h2>
   <div class="panel stack">
     <h3 data-t="howMany"></h3>
     <div class="seg" id="nSeg"><button type="button" data-n="2">2</button><button type="button" data-n="3">3</button><button type="button" data-n="4">4</button></div>
     <div id="seats"></div>
-    <div class="stack" id="lvlRow"><b data-t="lvlL"></b><div class="seg" id="lvlSeg"><button type="button" data-l="easy" data-t="easy"></button><button type="button" data-l="medium" data-t="medium"></button><button type="button" data-l="hard" data-t="hard"></button></div></div>
+    <div class="stack" id="jkRow"><b data-t="jkL"></b><div class="seg" id="jkSeg"><button type="button" data-j="1" data-t="jkWith"></button><button type="button" data-j="0" data-t="jkWithout"></button></div></div>
+    <div class="stack" id="lvlRow"><b id="lvlLabel"></b><div class="seg" id="lvlSeg"><button type="button" data-l="easy" data-t="easy"></button><button type="button" data-l="medium" data-t="medium"></button><button type="button" data-l="hard" data-t="hard"></button></div></div>
     <div class="stack"><b data-t="skinL"></b><div class="skins" id="skins"></div></div>
-    <div class="stack"><b data-t="rulesL"></b><ul class="rules"><li data-t="r1"></li><li data-t="r2"></li><li data-t="r3"></li><li data-t="r4"></li><li data-t="r5"></li><li data-t="r6"></li><li data-t="r7"></li></ul></div>
+    <div class="stack"><b id="rulesLabel"></b><ul class="rules" id="konkerRules"><li data-t="r1"></li><li data-t="r2"></li><li data-t="r3"></li><li data-t="r4"></li><li data-t="r5"></li><li data-t="r6"></li><li data-t="r7"></li></ul><ul class="rules" id="injeraRules"><li data-t="i1"></li><li data-t="i2"></li><li data-t="i3"></li><li data-t="i4"></li><li data-t="i5"></li><li data-t="i6"></li><li data-t="i7"></li></ul><ul class="rules" id="sekaRules"><li data-t="s1"></li><li data-t="s2"></li><li id="s3"></li><li data-t="s4"></li><li data-t="s5"></li></ul></div>
     <div class="row"><button class="btn primary" type="button" id="startBtn" data-t="start"></button><button class="btn gold" type="button" id="resumeBtn" data-t="resume"></button></div>
   </div>
 </section>
@@ -281,6 +302,32 @@ button.meld{color:inherit;font:inherit}
     </div>
     <div class="muted small" id="howLine"></div>
     <div class="row"><button class="btn ghost sm" type="button" id="quitBtn"></button></div>
+  </div>
+</section>
+
+<section class="view" id="v-injera" hidden>
+  <div class="bar"><button class="btn ghost" type="button" data-home data-t="home"></button><span class="muted small" id="iTag"></span></div>
+  <div class="iwrap">
+  <div class="felt">
+    <div class="iplayers" id="iPlayers"></div>
+    <div class="ring" id="ring"><div class="wot" id="wot"></div></div>
+  </div>
+  <div class="hand-wrap">
+    <div class="bar"><span class="status" id="iStatus"></span></div>
+    <div class="msg" id="iMsg" aria-live="polite"></div>
+    <div class="idrawn"><div id="iDrawn"></div><div class="stack" style="gap:6px"><b id="iDrawnL"></b><span class="muted" id="iGain"></span></div></div>
+    <div class="row">
+      <button class="btn primary" type="button" id="iTakeBtn" data-t="iTake"></button>
+      <button class="btn gold" type="button" id="iNoneBtn" data-t="iNone"></button>
+      <button class="btn ghost" type="button" id="iHintBtn" data-t="iHint"></button>
+    </div>
+    <div class="panel result" id="iOver" hidden style="text-align:center">
+      <h2 id="iOverTitle"></h2><div class="muted" id="iOverSub"></div>
+      <div class="row" style="justify-content:center"><button class="btn primary" type="button" id="iAgainBtn" data-t="again"></button><button class="btn ghost" type="button" id="iChangeBtn" data-t="change"></button></div>
+    </div>
+    <div class="muted small" data-t="iHow"></div>
+    <div class="row"><button class="btn ghost sm" type="button" id="iQuitBtn"></button></div>
+  </div>
   </div>
 </section>
 
@@ -363,7 +410,9 @@ function daysSince(d){if(!d)return Infinity;return Math.floor((Date.now()-new Da
    a run in one suit, or the same rank in different suits.
    To win: 3 Tris + 1 Quatris (13 cards, counting the groups shown on the table). */
 const KSUITS=["S","H","D","C"];
-function kDeck(decks){const d=[];let id=0;for(let k=0;k<decks;k++){for(const s of KSUITS)for(let r=1;r<=13;r++)d.push({id:id++,s,r,j:false});d.push({id:id++,s:null,r:0,j:true},{id:id++,s:null,r:0,j:true})}return d}
+/* Seka on Medium/Hard: ace is low only (no Q-K-A). Konker and Seka Easy: ace can also be high. */
+var kAceHigh=true;
+function kDeck(decks,noJokers){const d=[];let id=0;for(let k=0;k<decks;k++){for(const s of KSUITS)for(let r=1;r<=13;r++)d.push({id:id++,s,r,j:false});if(!noJokers)d.push({id:id++,s:null,r:0,j:true},{id:id++,s:null,r:0,j:true})}return d}
 function kShuffle(a){a=a.slice();for(let n=0;n<3;n++)for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const kRankVal=r=>r>=11?10:r;                 // same-rank groups: ace is 1, J/Q/K are 10
 const kRunVal=v=>v===14?11:v>=11?10:v;        // runs: ace low is 1, ace after the king (14) is 11
@@ -379,7 +428,7 @@ function kMeld(cards,ext){
  }
  if(!real.every(c=>c.s===real[0].s))return null;
  const s=real[0].s;let best=null;
- for(const high of[false,true]){
+ for(const high of kAceHigh?[false,true]:[false]){
   const ranks=real.map(c=>c.r===1&&high?14:c.r);
   if(new Set(ranks).size!==ranks.length)continue;
   const min=Math.min(...ranks),max=Math.max(...ranks),lo=high?2:1,hi=high?14:13;
@@ -448,7 +497,7 @@ function kJokerOptions(cards){const jokers=cards.filter(c=>c.j),real=cards.filte
  if(real.every(c=>c.r===real[0].r)&&new Set(real.map(c=>c.s)).size===real.length){const r=real[0].r,free=KSUITS.filter(s=>!real.some(c=>c.s===s)),v=kRankVal(r)*cards.length;
   const pick=(k,start,acc)=>{if(acc.length===jokers.length){const as={};jokers.forEach((j,i)=>as[j.id]={r,s:acc[i]});push(as,v);return}for(let i=start;i<free.length;i++)pick(k,i+1,acc.concat(free[i]))};pick(0,0,[])}
  else{const s=real[0].s,len=cards.length;
-  for(const high of[false,true]){const ranks=real.map(c=>c.r===1&&high?14:c.r);if(new Set(ranks).size!==ranks.length)continue;const lo=high?2:1,hi=high?14:13,min=Math.min(...ranks),max=Math.max(...ranks);
+  for(const high of kAceHigh?[false,true]:[false]){const ranks=real.map(c=>c.r===1&&high?14:c.r);if(new Set(ranks).size!==ranks.length)continue;const lo=high?2:1,hi=high?14:13,min=Math.min(...ranks),max=Math.max(...ranks);
    for(let a=lo;a+len-1<=hi;a++){if(min<a||max>a+len-1)continue;const miss=[];let value=0;for(let v=a;v<a+len;v++){value+=kRunVal(v);if(!ranks.includes(v))miss.push(v)}
     if(miss.length!==jokers.length)continue;const as={};jokers.forEach((j,i)=>as[j.id]={r:miss[i]===14?1:miss[i],s});push(as,value)}}}
  return out.sort((x,y)=>y.value-x.value)}
@@ -489,9 +538,9 @@ const T={
   p1Label:"Player 1",p2Label:"Player 2",p3Label:"Guest",nameHint:"Type any name. Leave a box empty to use Mom, Dad or Guest, which switch language with the rest of the app.",
   newGuest:"Start fresh for a new guest",newGuestC:"Tap again to clear the guest's scores",play:"Play →",soon:"Coming soon",home:"← Home",points:"points",scores:"Score collector",seeScores:"See scores →",
   kTitle:"Konker (ኮንከር)",kDesc:"Build 3 Tris and 1 Quatris in your hand. Show 41 to take from the discard pile.",
-  sekaTitle:"Seka (ሴካ)",sekaDesc:"Two-player rummy with one deck.",kGo:"Game in progress, pick up where you left off",kNew:"Against the iPad or each other",
+  sekaTitle:"Seka (ሴካ)",sekaDesc:"Build 2 Tris and 1 Quatris in your hand. Take from the discard pile any time.",jkL:"Jokers",jkWith:"With jokers",jkWithout:"Without jokers",lvlLs:"Level (strength of the iPad and the ace rule)",s1:"One deck for 2 players, two decks for 3 or 4, with or without jokers. Everyone gets 10 cards; the dealer gets 11 and starts by discarding one.",s2:"A Tris (ትሪስ) is 3 cards and a Quatris (ኳትሪስ) is 4: a run in one suit or the same number in different suits. A joker is worth the card it stands for.",s3e:"Easy: ace is 1 in A-2-3 and A-2-3-4, and 11 in Q-K-A and J-Q-K-A.",s3h:"Medium and Hard: ace is low only (A-2-3). Q-K-A does not count.",s4:"Each turn: draw from the pile or take the top discard (no 41 needed), then discard one card. Nothing is laid down during the game.",s5:"Win when your 10 cards make 2 Tris and 1 Quatris after your discard: 20 points. Winning with a joker as the last discard is a Vice: 40 points.",swins:"Seka wins",iwins:"Injera Bewet wins",irounds:"Injera Bewet games",histIWin:"Injera Bewet · most cards",iTitle:"Injera Bewet (እንጀራ በወጥ)",iDesc:"An adding game: draw from the circle and take the cards that match or add up.",rulesI:"How Injera Bewet is played",visitor:"Friend",i1:"One deck for 2 players, two decks for 3 or 4, with jokers. The cards lie face down in a circle (the እንጀራ); 4 cards go face up in the middle (the ወጥ). A joker never goes in the ወጥ.",i2:"On your turn, tap any face-down card. It takes every ወጥ card with the same number, and every group of cards that adds up to it (A=1, J=11, Q=12, K=13).",i3:"It also takes the top of any other player's pile (መደብ) with the same number, along with the cards that top card won.",i4:"If you take anything, your card goes on top of your መደብ with the winnings under it, and you draw again. If it takes nothing, it goes into the ወጥ and the turn passes.",i5:"A joker takes the whole ወጥ. If another player's መደብ has a joker on top, a joker takes their whole pile.",i6:"Whoever draws the last face-down card takes everything left in the ወጥ.",i7:"When the circle is empty, the most cards wins: 20 points. With 3 or 4 players, everyone is a person and the iPad is the referee.",iTake:"Take",mdebL:"መደብ",iNone:"Nothing to take",iHint:"Hint",iHow:"You find the matches: tap the ወጥ cards your card takes (the same number, or cards that add up to it) and any matching መደብ top, then tap Take. The iPad checks every move.",iDrawSt:n=>`${n}: tap any face-down card in the circle to draw`,iCapSt:n=>`${n}: find everything your card takes, then tap Take`,iOtherSt:n=>`${n} is playing…`,iDrewL:c=>`Drawn card: ${c}`,iGainL:n=>`Won this turn: ${n} cards`,iEmpty:"The ወጥ is empty",iePick:"Tap the cards to take first.",ieSum:"Those ወጥ cards don't work. Each group must be the same number as your card, or add up to it.",ieTop:"That መደብ top card doesn't match your card.",ieMore:"There is still something your card can take. Look again, or tap Hint.",iHintNone:"There is nothing to take. Tap Nothing to take.",iHintShow:"Look at the cards with the green outline.",iJoker:n=>`Joker! ${n} takes the whole ወጥ.`,iJokerPile:(n,o)=>`Joker on joker! ${n} takes all of ${o}'s cards.`,iLast:n=>`Last card! ${n} takes everything left in the ወጥ.`,iTook:(n,k)=>`${n} won ${k} cards and draws again.`,iMiss:n=>`${n}'s card went into the ወጥ.`,iWins:n=>`${n} wins with the most cards!`,iTie:"It's a tie: no winner this time.",svice:"Seka Vices",srounds:"Seka rounds",histSWin:"Seka · won the round",histSVice:"Seka · won with a Vice",kGo:"Game in progress, pick up where you left off",kNew:"Against the iPad or each other",
   howMany:"How many players at the table?",seatL:n=>`Seat ${n}`,ipad:"iPad",lvlL:"How strong should the iPad be?",easy:"Easy",medium:"Medium",hard:"Hard",
-  rulesL:"How Konker is played",
+  rulesL:"How Konker is played",rulesS:"How Seka is played",
   r1:"One deck with 2 jokers for 2 players, two decks for 3 or 4. Everyone gets 13 cards; the dealer gets 14 and starts by discarding one.",
   r2:"A Tris (ትሪስ) is 3 cards and a Quatris (ኳትሪስ) is 4: a run in one suit (3♠ 4♠ 5♠) or the same number in different suits (8♠ 8♥ 8♦).",
   r3:"Ace is 1 in A-2-3, A-2-3-4 and A-A-A, and 11 in Q-K-A and J-Q-K-A. J, Q and K are 10. A joker is worth the card it stands for.",
@@ -522,9 +571,9 @@ const T={
   p1Label:"ተጫዋች 1",p2Label:"ተጫዋች 2",p3Label:"እንግዳ",nameHint:"ማንኛውንም ስም ይጻፉ። ባዶ ከተተወ እማማ፣ አባባ ወይም እንግዳ ይሆናል፤ ከቋንቋው ጋርም ይቀየራል።",
   newGuest:"ለአዲስ እንግዳ እንደገና ጀምር",newGuestC:"የእንግዳውን ነጥብ ለማጥፋት እንደገና ይንኩ",play:"ተጫወቱ →",soon:"በቅርቡ ይመጣል",home:"← ዋና ገጽ",points:"ነጥብ",scores:"የነጥብ መዝገብ",seeScores:"ውጤቶችን እዩ →",
   kTitle:"ኮንከር",kDesc:"በእጅዎ 3 ትሪስ እና 1 ኳትሪስ ይስሩ። ከተጣለው ለማንሳት 41 ያሳዩ።",
-  sekaTitle:"ሴካ",sekaDesc:"በአንድ ካርታ የሚጫወቱት የሁለት ሰው ጨዋታ።",kGo:"ያልተጨረሰ ጨዋታ፤ ካቆማችሁበት ቀጥሉ",kNew:"ከአይፓዱ ወይም እርስ በርስ",
+  sekaTitle:"ሴካ",sekaDesc:"በእጅዎ 2 ትሪስ እና 1 ኳትሪስ ይስሩ። ከተጣለው በፈለጉ ጊዜ ማንሳት ይችላሉ።",jkL:"ጆከር",jkWith:"ከጆከር ጋር",jkWithout:"ያለ ጆከር",lvlLs:"ደረጃ (የአይፓዱ ጥንካሬ እና የኤሲ ደንብ)",s1:"ለ2 ተጫዋች አንድ ካርታ፣ ለ3 ወይም 4 ሁለት ካርታ፤ ከጆከር ጋር ወይም ያለ ጆከር። ሁሉም 10 ካርታ ያገኛል፤ አዳዩ 11 ያገኝና አንዱን በመጣል ይጀምራል።",s2:"ትሪስ 3 ካርታ፣ ኳትሪስ ደግሞ 4 ካርታ ነው፦ አንድ ዓይነት ተከታታይ ወይም የተለያየ ዓይነት ያላቸው ተመሳሳይ ቁጥሮች። ጆከር የሚተካውን ካርታ ዋጋ ይይዛል።",s3e:"ቀላል፦ ኤሲ በA-2-3 እና A-2-3-4 ውስጥ 1፣ በQ-K-A እና J-Q-K-A ውስጥ 11 ነው።",s3h:"መካከለኛ እና ከባድ፦ ኤሲ ዝቅተኛ ብቻ ነው (A-2-3)። Q-K-A አይቆጠርም።",s4:"በየተራው፦ ከክምሩ ይሳቡ ወይም የተጣለውን የላይኛውን ያንሱ (41 አያስፈልግም)፣ ከዚያ አንድ ካርታ ይጣሉ። በጨዋታው ወቅት ምንም አይወርድም።",s5:"ከጣሉ በኋላ 10ሩ ካርታዎችዎ 2 ትሪስ እና 1 ኳትሪስ ከሆኑ ያሸንፋሉ፦ 20 ነጥብ። በመጨረሻ ጆከር ጥለው ካሸነፉ ቫይስ ነው፦ 40 ነጥብ።",swins:"የሴካ ድሎች",iwins:"የእንጀራ በወጥ ድሎች",irounds:"የእንጀራ በወጥ ጨዋታዎች",histIWin:"እንጀራ በወጥ · ብዙ ካርታ",iTitle:"እንጀራ በወጥ",iDesc:"የመደመር ጨዋታ፦ ከክቡ ይሳቡ፣ የሚመሳሰሉትን ወይም ድምራቸው የሚሆኑትን ይውሰዱ።",rulesI:"እንጀራ በወጥ እንዴት ይጫወታል",visitor:"ጓደኛ",i1:"ለ2 ተጫዋች አንድ ካርታ፣ ለ3 ወይም 4 ሁለት ካርታ፣ ከጆከር ጋር። ካርታዎቹ በክብ ተገልብጠው ይቀመጣሉ (እንጀራ)፤ 4 ካርታ በመሃል ተገልጦ ይቀመጣል (ወጥ)። ጆከር ወጥ ውስጥ አይገባም።",i2:"በተራዎ ማንኛውንም የተገለበጠ ካርታ ይንኩ። ወጡ ውስጥ ያለውን ተመሳሳይ ቁጥር ሁሉ፣ እና ድምራቸው ቁጥሩን የሚያክል ካርታዎችን ሁሉ ይወስዳል (A=1፣ J=11፣ Q=12፣ K=13)።",i3:"የሌላ ተጫዋች መደብ ላይ ያለው የላይኛው ካርታ ተመሳሳይ ቁጥር ከሆነ፣ እሱንና ያሸነፋቸውን ካርታዎች ይወስዳል።",i4:"ካሸነፉ፣ ካርታዎ ከአሸነፏቸው ጋር በመደብዎ ላይ ይቀመጣል፤ እንደገና ይስባሉ። ምንም ካልወሰደ ወጡ ውስጥ ይገባል፤ ተራው ያልፋል።",i5:"ጆከር ወጡን በሙሉ ይወስዳል። የሌላ ተጫዋች መደብ ላይ ጆከር ካለ፣ ጆከር መደቡን በሙሉ ይወስዳል።",i6:"የመጨረሻውን የተገለበጠ ካርታ የሳበ ወጡ ውስጥ የቀረውን ሁሉ ይወስዳል።",i7:"ክቡ ሲያልቅ ብዙ ካርታ ያለው ያሸንፋል፦ 20 ነጥብ። 3 ወይም 4 ሲሆኑ ሁሉም ሰዎች ናቸው፤ አይፓዱ ዳኛ ነው።",iTake:"ውሰድ",mdebL:"መደብ",iNone:"የሚወሰድ የለም",iHint:"ፍንጭ",iHow:"ተመሳሳዩን እርስዎ ያገኛሉ፦ ካርታዎ የሚወስዳቸውን የወጥ ካርታዎች (ተመሳሳይ ቁጥር ወይም ድምራቸው የሚሆኑ) እና የሚመሳሰለውን የመደብ የላይኛውን ካርታ ይንኩ፣ ከዚያ «ውሰድ» ይንኩ። አይፓዱ እያንዳንዱን እንቅስቃሴ ይፈትሻል።",iDrawSt:n=>`${n}፦ ለመሳብ በክቡ ውስጥ ያለውን ማንኛውንም የተገለበጠ ካርታ ይንኩ`,iCapSt:n=>`${n}፦ ካርታዎ የሚወስደውን ሁሉ ያግኙ፣ ከዚያ «ውሰድ» ይንኩ`,iOtherSt:n=>`${n} እየተጫወተ ነው…`,iDrewL:c=>`የተሳበው ካርታ፦ ${c}`,iGainL:n=>`በዚህ ተራ ያሸነፉት፦ ${n} ካርታ`,iEmpty:"ወጡ ባዶ ነው",iePick:"መጀመሪያ የሚወስዷቸውን ካርታዎች ይንኩ።",ieSum:"እነዚህ የወጥ ካርታዎች አይሆኑም። እያንዳንዱ ቡድን ከካርታዎ ጋር ተመሳሳይ ወይም ድምሩ እኩል መሆን አለበት።",ieTop:"ያ የመደብ የላይኛው ካርታ ከካርታዎ ጋር አይመሳሰልም።",ieMore:"ካርታዎ የሚወስደው ገና አለ። እንደገና ይመልከቱ ወይም «ፍንጭ» ይንኩ።",iHintNone:"የሚወሰድ ነገር የለም። «የሚወሰድ የለም» ይንኩ።",iHintShow:"በአረንጓዴ የተከበቡትን ካርታዎች ይመልከቱ።",iJoker:n=>`ጆከር! ${n} ወጡን በሙሉ ወሰደ።`,iJokerPile:(n,o)=>`ጆከር በጆከር! ${n} የ${o}ን ካርታዎች በሙሉ ወሰደ።`,iLast:n=>`የመጨረሻ ካርታ! ${n} ወጡ ውስጥ የቀረውን ሁሉ ወሰደ።`,iTook:(n,k)=>`${n} ${k} ካርታ አሸነፈ፤ እንደገና ይስባል።`,iMiss:n=>`የ${n} ካርታ ወጡ ውስጥ ገባ።`,iWins:n=>`${n} በብዙ ካርታ አሸነፈ!`,iTie:"እኩል ሆነ፤ በዚህ ጊዜ አሸናፊ የለም።",svice:"የሴካ ቫይሶች",srounds:"የሴካ ዙሮች",histSWin:"ሴካ · ዙሩን አሸነፈ",histSVice:"ሴካ · በቫይስ አሸነፈ",kGo:"ያልተጨረሰ ጨዋታ፤ ካቆማችሁበት ቀጥሉ",kNew:"ከአይፓዱ ወይም እርስ በርስ",
   howMany:"ስንት ተጫዋቾች ይጫወታሉ?",seatL:n=>`ቦታ ${n}`,ipad:"አይፓድ",lvlL:"አይፓዱ ምን ያህል ጠንካራ ይሁን?",easy:"ቀላል",medium:"መካከለኛ",hard:"ከባድ",
-  rulesL:"ኮንከር እንዴት ይጫወታል",
+  rulesL:"ኮንከር እንዴት ይጫወታል",rulesS:"ሴካ እንዴት ይጫወታል",
   r1:"ለ2 ተጫዋች አንድ ካርታ ከ2 ጆከር ጋር፣ ለ3 ወይም 4 ሁለት ካርታ። ሁሉም 13 ካርታ ያገኛል፤ አዳዩ 14 ያገኝና አንዱን በመጣል ይጀምራል።",
   r2:"ትሪስ 3 ካርታ፣ ኳትሪስ ደግሞ 4 ካርታ ነው፦ አንድ ዓይነት ተከታታይ (3♠ 4♠ 5♠) ወይም የተለያየ ዓይነት ያላቸው ተመሳሳይ ቁጥሮች (8♠ 8♥ 8♦)።",
   r3:"ኤሲ በA-2-3፣ A-2-3-4 እና A-A-A ውስጥ 1፣ በQ-K-A እና J-Q-K-A ውስጥ 11 ነው። J፣ Q እና K 10 ናቸው። ጆከር የሚተካውን ካርታ ዋጋ ይይዛል።",
@@ -573,12 +622,12 @@ document.querySelectorAll(".fan").forEach(f=>{[{r:1,s:"S"},{r:13,s:"H"},{j:true}
 
 /* ---------- views ---------- */
 let view="home";
-function show(v){view=v;["home","setup","play","scores"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
+function show(v){view=v;["home","setup","play","injera","scores"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
 document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{show("home");renderHome()});
 function applyLang(){document.documentElement.lang=lang;
  document.querySelectorAll("[data-t]").forEach(el=>{const v=t(el.dataset.t);if(typeof v==="string")el.textContent=v});
  $("langBtn").textContent=t("langBtn");const h=new Date().getHours();$("greet").textContent=t("greet")[h<12?0:h<17?1:2];
- renderHome();if(view==="setup")renderSetup();if(view==="play")render();if(view==="scores")renderScores()}
+ renderHome();if(view==="setup")renderSetup();if(view==="play")render();if(view==="injera")renderI();if(view==="scores")renderScores()}
 $("langBtn").onclick=()=>{lang=lang==="en"?"am":"en";ls.set("lang",lang);applyLang()};
 let gArm=false;
 function renderHome(){const box=$("players");box.innerHTML="";
@@ -587,7 +636,7 @@ function renderHome(){const box=$("players");box.innerHTML="";
   b.querySelector(".av").textContent=[...nm][0]||"?";b.querySelector(".nm").textContent=nm;b.querySelector(".pt").textContent=players[i].pts+" "+t("points");
   b.onclick=()=>{cur=i;ls.set("cur",i);gArm=false;$("renameForm").hidden=true;renderHome()};box.appendChild(b)});
  $("newGuestBtn").hidden=cur!==2;$("newGuestBtn").textContent=gArm?t("newGuestC"):t("newGuest");
- $("kStatus").textContent=G&&!G.done?t("kGo"):t("kNew");$("homePts").textContent=players[cur].pts}
+ {const kg=ls.get("kgame2",null),sg=ls.get("sgame1",null);$("kStatus").textContent=kg&&!kg.done?t("kGo"):t("kNew");$("sStatus").textContent=sg&&!sg.done?t("kGo"):t("kNew");const ig=ls.get("igame1",null);$("iStatusHome").textContent=ig&&!ig.done?t("kGo"):t("kNew")}$("homePts").textContent=players[cur].pts}
 $("newGuestBtn").onclick=()=>{if(!gArm){gArm=true;renderHome();setTimeout(()=>{gArm=false;renderHome()},3000);return}gArm=false;players[2]=blank();saveP(2);renderHome()};
 $("renameBtn").onclick=()=>{const f=$("renameForm");f.hidden=!f.hidden;if(!f.hidden){[0,1,2].forEach(i=>{const el=$("name"+i);const n=players[i].name||"";el.value=n[0]==="@"?t(n.slice(1)):n;el.placeholder=t(["mom","dad","guest"][i])});$("name0").focus()}};
 $("renameForm").onsubmit=e=>{e.preventDefault();[0,1,2].forEach(i=>{players[i].name=cleanName($("name"+i).value,i);saveP(i)});$("renameForm").hidden=true;renderHome()};
@@ -599,38 +648,49 @@ let skin=ls.get("skin","tibeb");document.documentElement.dataset.skin=skin;
 function renderSkins(){const box=$("skins");box.innerHTML="";SKINS.forEach(([k,lbl])=>{const b=document.createElement("button");b.type="button";b.className="skin";b.setAttribute("aria-pressed",String(skin===k));
  const pv=document.createElement("span");pv.className="pv";pv.dataset.skin=k;pv.appendChild(cardEl(null,{back:true}));pv.appendChild(cardEl({r:1,s:"H"}));b.appendChild(pv);b.appendChild(document.createTextNode(t(lbl)));
  b.onclick=()=>{skin=k;ls.set("skin",k);document.documentElement.dataset.skin=k;renderSkins()};box.appendChild(b)})}
-let setup=Object.assign({n:2,seats:["cpu","cpu","cpu"],level:"medium"},ls.get("ksetup2",{}));
-$("goKonker").onclick=()=>{if(G&&!G.done){show("play");render();resumeTurn()}else{show("setup");renderSetup()}};
-function renderSetup(){
+const setupMain=Object.assign({n:2,seats:["cpu","cpu","cpu"],level:"medium",jokers:true},ls.get("ksetup2",{}));
+const setupI=Object.assign({n:2,seats:["cpu","1","2"]},ls.get("isetup1",{}));let setup=setupMain;
+const saveSetup=()=>ls.set(mode==="injera"?"isetup1":"ksetup2",setup);
+let mode="konker";const KEY={konker:"kgame2",seka:"sgame1",injera:"igame1"};
+function activate(m){mode=m;setup=m==="injera"?setupI:setupMain;G=ls.get(KEY[m],null);if(G&&!G.game)G.game=m;kAceHigh=!(G&&G.game==="seka"&&!G.aceHigh);pend=null;sel.clear();msg=""}
+function openGame(m){activate(m);if(G&&!G.done){playView()}else{show("setup");renderSetup()}}
+function playView(){if(mode==="injera"){show("injera");renderI();resumeI()}else{show("play");render();resumeTurn()}}
+$("goKonker").onclick=()=>openGame("konker");$("goSeka").onclick=()=>openGame("seka");$("goInjera").onclick=()=>openGame("injera");
+function renderSetup(){const sk=mode==="seka",ij=mode==="injera";$("setupTitle").textContent=t(ij?"iTitle":sk?"sekaTitle":"kTitle");$("jkRow").hidden=!sk;$("konkerRules").hidden=sk||ij;$("sekaRules").hidden=!sk;$("injeraRules").hidden=!ij;
+ $("lvlLabel").textContent=t(sk?"lvlLs":"lvlL");$("rulesLabel").textContent=t(ij?"rulesI":sk?"rulesS":"rulesL");$("s3").textContent=t(setup.level==="easy"?"s3e":"s3h");
+ document.querySelectorAll("#jkSeg button").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.j==="1")===(setup.jokers!==false))));
  document.querySelectorAll("#nSeg button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.n===setup.n)));
  document.querySelectorAll("#lvlSeg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.l===setup.level)));
  const box=$("seats");box.innerHTML="";
  const s1=document.createElement("div");s1.className="seat";s1.innerHTML=`<b></b><span class="muted"></span>`;s1.firstChild.textContent=L().seatL(1);s1.lastChild.textContent=pname(cur);box.appendChild(s1);
  for(let k=0;k<setup.n-1;k++){const row=document.createElement("div");row.className="seat";const h=document.createElement("b");h.textContent=L().seatL(k+2);row.appendChild(h);
   const chips=document.createElement("div");chips.className="chips";
-  if(setup.seats[k]!=="cpu"&&+setup.seats[k]===cur)setup.seats[k]="cpu";
-  ["cpu",...[0,1,2].filter(i=>i!==cur).map(String)].forEach(o=>{const taken=o!=="cpu"&&setup.seats.slice(0,setup.n-1).some((x,j)=>j!==k&&x===o);const b=document.createElement("button");b.type="button";b.className="chip";
-   b.textContent=o==="cpu"?t("ipad"):pname(+o);b.disabled=taken;b.setAttribute("aria-pressed",String(setup.seats[k]===o));
-   b.onclick=()=>{setup.seats[k]=o;ls.set("ksetup2",setup);renderSetup()};chips.appendChild(b)});
+  const people=[0,1,2].filter(i=>i!==cur).map(String),optsS=ij&&setup.n>2?people.concat(["v"]):["cpu",...people];
+  if(setup.seats[k]!=="cpu"&&setup.seats[k]!=="v"&&+setup.seats[k]===cur)setup.seats[k]=optsS[0];if(!optsS.includes(setup.seats[k]))setup.seats[k]=optsS.find(o=>o==="v"||!setup.seats.slice(0,setup.n-1).some((x,j)=>j!==k&&x===o))||optsS[0];
+  optsS.forEach(o=>{const taken=o!=="cpu"&&o!=="v"&&setup.seats.slice(0,setup.n-1).some((x,j)=>j!==k&&x===o);const b=document.createElement("button");b.type="button";b.className="chip";
+   b.textContent=o==="cpu"?t("ipad"):o==="v"?t("visitor"):pname(+o);b.disabled=taken;b.setAttribute("aria-pressed",String(setup.seats[k]===o));
+   b.onclick=()=>{setup.seats[k]=o;saveSetup();renderSetup()};chips.appendChild(b)});
   row.appendChild(chips);box.appendChild(row)}
- $("lvlRow").hidden=!setup.seats.slice(0,setup.n-1).includes("cpu");
+ $("lvlRow").hidden=ij||(!sk&&!setup.seats.slice(0,setup.n-1).includes("cpu"));
  $("resumeBtn").hidden=!(G&&!G.done);renderSkins()}
-document.querySelectorAll("#nSeg button").forEach(b=>b.onclick=()=>{setup.n=+b.dataset.n;ls.set("ksetup2",setup);renderSetup()});
-document.querySelectorAll("#lvlSeg button").forEach(b=>b.onclick=()=>{setup.level=b.dataset.l;ls.set("ksetup2",setup);renderSetup()});
-$("startBtn").onclick=()=>{newGame();show("play");render();resumeTurn()};
-$("resumeBtn").onclick=()=>{show("play");render();resumeTurn()};
+document.querySelectorAll("#nSeg button").forEach(b=>b.onclick=()=>{setup.n=+b.dataset.n;saveSetup();renderSetup()});
+document.querySelectorAll("#jkSeg button").forEach(b=>b.onclick=()=>{setup.jokers=b.dataset.j==="1";saveSetup();renderSetup()});
+document.querySelectorAll("#lvlSeg button").forEach(b=>b.onclick=()=>{setup.level=b.dataset.l;saveSetup();renderSetup()});
+$("startBtn").onclick=()=>{if(mode==="injera")newGameI();else newGame();playView()};
+$("resumeBtn").onclick=()=>playView();
 
 /* ---------- game state ---------- */
-let pend=null;let G=ls.get("kgame2",null),sel=new Set(),busy=false,quitArm=false,msg="",msgErr=false;
-const saveG=()=>ls.set("kgame2",G);
+let pend=null;let G=null,sel=new Set(),busy=false,quitArm=false,msg="",msgErr=false;
+const saveG=()=>{if(G)ls.set(KEY[G.game||"konker"],G)};const seka=()=>!!G&&G.game==="seka";
+const needOf=i=>seka()?{t:2,q:1}:kNeed(G.table[i]);
 const isHuman=i=>G.seats[i].kind!=="cpu";
 const humans=()=>G.seats.filter(s=>s.kind!=="cpu").length;
-const seatName=i=>{const s=G.seats[i];if(s.kind!=="cpu")return pname(s.pid);const cpus=G.seats.filter(x=>x.kind==="cpu").length;return t("ipad")+(cpus>1?" "+G.seats.slice(0,i+1).filter(x=>x.kind==="cpu").length:"")};
-const opened=i=>G.table[i].length>0;
+const seatName=i=>{const s=G.seats[i];if(s.kind==="v")return t("visitor")+" "+(G.seats.slice(0,i+1).filter(x=>x.kind==="v").length);if(s.kind!=="cpu")return pname(s.pid);const cpus=G.seats.filter(x=>x.kind==="cpu").length;return t("ipad")+(cpus>1?" "+G.seats.slice(0,i+1).filter(x=>x.kind==="cpu").length:"")};
+const opened=i=>seka()||G.table[i].length>0;
 function newGame(){const seats=[{kind:"human",pid:cur}];for(let k=0;k<setup.n-1;k++){const o=setup.seats[k];seats.push(o==="cpu"?{kind:"cpu"}:{kind:"human",pid:+o})}
- G={seats,level:setup.level,round:0,dealer:Math.floor(Math.random()*seats.length)-1,done:false};deal()}
-function deal(){const n=G.seats.length,deck=kShuffle(kDeck(n<=2?1:2));G.round++;G.dealer=(G.dealer+1+n)%n;
- G.hands=G.seats.map(()=>[]);for(let k=0;k<13;k++)for(let i=0;i<n;i++)G.hands[(G.dealer+1+i)%n].push(deck.pop());G.hands[G.dealer].push(deck.pop());
+ const sk=mode==="seka";G={game:mode,aceHigh:!sk||setup.level==="easy",jokers:!sk||setup.jokers!==false,seats,level:setup.level,round:0,dealer:Math.floor(Math.random()*seats.length)-1,done:false};deal()}
+function deal(){kAceHigh=G.aceHigh!==false;const n=G.seats.length,deck=kShuffle(kDeck(n<=2?1:2,G.jokers===false)),hs=seka()?10:13;G.round++;G.dealer=(G.dealer+1+n)%n;
+ G.hands=G.seats.map(()=>[]);for(let k=0;k<hs;k++)for(let i=0;i<n;i++)G.hands[(G.dealer+1+i)%n].push(deck.pop());G.hands[G.dealer].push(deck.pop());
  G.table=G.seats.map(()=>[]);G.stock=deck;G.discard=[];G.turn=G.dealer;G.phase="play";G.first=true;G.took=null;G.pre=null;G.newId=null;G.over=null;G.log="";G.jas={};pend=null;
  G.lastHuman=isHuman(G.dealer)?G.dealer:G.seats.findIndex(s=>s.kind!=="cpu");G.handover=humans()>1&&isHuman(G.turn);sel.clear();msg="";saveG()}
 function reshuffle(){if(G.stock.length)return true;if(G.discard.length<=1)return false;const top=G.discard.pop();G.stock=kShuffle(G.discard);G.discard=[top];return true}
@@ -653,7 +713,7 @@ function actSwap(me,cid,sw){const g=G.table[sw.o][sw.gi],k=g.findIndex(x=>x.id==
 /* discard; returns an error key, or null */
 /* the table with every declared joker fixed to the card it stands for */
 function fixedTables(){return G.table.map(gs=>gs.map(g=>g.map(c=>{if(!c.j)return c;const a=asOf(g,c);return a&&a.s?{id:c.id,r:a.r,s:a.s,j:false,fx:true}:c})))}
-function finishWith(rest,me){return kFinish(rest,fixedTables(),me,kNeed(G.table[me]))}
+function finishWith(rest,me){return kFinish(rest,fixedTables(),me,needOf(me))}
 const isGebi=c=>kFits(c,fixedTables());
 /* may this card be discarded? A ገቢ card only if it wins, or if every other card is ገቢ too */
 function gebiBlocked(c,me){if(!isGebi(c))return false;const h=G.hands[me];return h.some(x=>x.id!==c.id&&x.id!==G.took&&!isGebi(x))}
@@ -670,9 +730,9 @@ function actDiscard(id){const me=G.turn,h=G.hands[me],c=h.find(x=>x.id===id);if(
 function nextTurn(){const n=G.seats.length;G.turn=(G.turn+1)%n;G.phase="draw";G.took=null;sel.clear();msg="";
  if(isHuman(G.turn)){G.handover=humans()>1&&G.turn!==G.lastHuman;G.lastHuman=G.turn}saveG()}
 function endRound(w,vice,groups,ins){G.over={w,vice,groups:groups||null,ins:ins||[]};G.phase="over";
- G.seats.forEach((s,i)=>{if(s.kind==="cpu")return;const p=players[s.pid];p.kRounds=(p.kRounds||0)+1;const d=dayStr();if(!p.days.includes(d))p.days.push(d);
-  if(i===w){const pts=vice?80:40;p.pts+=pts;p.kWins=(p.kWins||0)+1;if(vice)p.kVice=(p.kVice||0)+1;p.hist.unshift({d,v:vice?1:0,pts});p.hist=p.hist.slice(0,30)}saveP(s.pid)});
- saveG();if(w!=null&&isHuman(w))setTimeout(()=>cheer(L().wins(seatName(w)),vice?t("vice"):"",vice?80:40),600)}
+ G.seats.forEach((s,i)=>{if(s.kind==="cpu")return;const p=players[s.pid];if(seka())p.sRounds=(p.sRounds||0)+1;else p.kRounds=(p.kRounds||0)+1;const d=dayStr();if(!p.days.includes(d))p.days.push(d);
+  if(i===w){const sk=seka(),pts=sk?(vice?40:20):(vice?80:40);p.pts+=pts;if(sk){p.sWins=(p.sWins||0)+1;if(vice)p.sVice=(p.sVice||0)+1}else{p.kWins=(p.kWins||0)+1;if(vice)p.kVice=(p.kVice||0)+1}p.hist.unshift({d,v:vice?1:0,pts,g:sk?"s":"k"});p.hist=p.hist.slice(0,30)}saveP(s.pid)});
+ saveG();if(w!=null&&isHuman(w)){const pp=seka()?(vice?40:20):(vice?80:40);setTimeout(()=>cheer(L().wins(seatName(w)),vice?t("vice"):"",pp),600)}}
 
 /* ---------- the iPad players ---------- */
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -682,7 +742,7 @@ function bestDiscard(h,need,lvl,avoid){let idx=h.map((c,i)=>i).filter(i=>h[i].id
  if(lvl==="easy"&&Math.random()<.4)return h[pool[Math.floor(Math.random()*pool.length)]];
  let best=null,bs=-1;for(const i of pool){const s=kScore(h,need,i)+(lvl==="hard"?0:Math.random()*4);if(s>bs){bs=s;best=h[i]}}return best}
 async function cpuTurn(){busy=true;const me=G.turn,lvl=G.level;render();await wait(800);
- if(G.phase==="draw"){const top=G.discard[G.discard.length-1],h=G.hands[me],need=kNeed(G.table[me]);let plan=null;
+ if(G.phase==="draw"){const top=G.discard[G.discard.length-1],h=G.hands[me],need=needOf(me);let plan=null;
   if(top){const h14=h.concat([top]);
    if(winDiscards(h14,need,0,top.id).length)plan={win:true};
    else if(!(lvl==="easy"&&Math.random()<.5)){
@@ -693,7 +753,7 @@ async function cpuTurn(){busy=true;const me=G.turn,lvl=G.level;render();await wa
   if(plan){actTake();if(plan.open)actShow(plan.open.groups)}else if(!actDraw()){busy=false;render();return}
   saveG();render();await wait(700)}
  if(G.phase!=="play"&&G.phase!=="show"){busy=false;return}
- const h=G.hands[me],need=kNeed(G.table[me]);if(G.phase==="play"&&opened(me)&&!(lvl==="easy"&&Math.random()<.5)){let again=true;while(again){again=false;for(const c of G.hands[me]){const sw=swapsFor(me,c);if(sw.length){actSwap(me,c.id,sw[0]);again=true;saveG();render();await wait(700);break}}}}
+ const h=G.hands[me],need=needOf(me);if(G.phase==="play"&&opened(me)&&!(lvl==="easy"&&Math.random()<.5)){let again=true;while(again){again=false;for(const c of G.hands[me]){const sw=swapsFor(me,c);if(sw.length){actSwap(me,c.id,sw[0]);again=true;saveG();render();await wait(700);break}}}}
  const wins=winDiscards(G.hands[me],need,0,G.took);
  let d=wins.length?(wins.find(c=>c.j)||wins[0]):bestDiscard(G.hands[me],need,lvl,G.took);
  if(G.phase==="show"&&!wins.length){actPutBack();actDraw();d=bestDiscard(G.hands[me],need,lvl,null)}
@@ -703,21 +763,21 @@ function resumeTurn(){if(!G||G.phase==="over"||busy||view!=="play")return;if(!is
 /* ---------- hand helpers ---------- */
 function runsInRow(h){const out=[];let i=0;while(i<h.length){if(i+4<=h.length&&kMeld(h.slice(i,i+4))){out.push([i,4]);i+=4}else if(i+3<=h.length&&kMeld(h.slice(i,i+3))){out.push([i,3]);i+=3}else i++}return out}
 function sortHand(h,by){return h.slice().sort((a,b)=>{if(a.j!==b.j)return a.j?1:-1;if(by==="suit")return KSUITS.indexOf(a.s)-KSUITS.indexOf(b.s)||a.r-b.r;return a.r-b.r||KSUITS.indexOf(a.s)-KSUITS.indexOf(b.s)})}
-function groupHand(i){const h=G.hands[i],need=kNeed(G.table[i]);const cv=kCover(h,Math.max(1,need.q));const used=new Set(),out=[];
+function groupHand(i){const h=G.hands[i],need=needOf(i);const cv=kCover(h,Math.max(1,need.q));const used=new Set(),out=[];
  cv.groups.forEach(g=>{const cards=g.idx.map(k=>h[k]);const m=kMeld(cards);m.order.forEach(id=>{out.push(cards.find(c=>c.id===id));used.add(id)})});
  G.hands[i]=out.concat(sortHand(h.filter(c=>!used.has(c.id)),"suit"))}
 
 /* ---------- rendering ---------- */
 const viewer=()=>isHuman(G.turn)?G.turn:G.lastHuman;
 function render(){if(!G)return;const n=G.seats.length,V=viewer(),myTurn=isHuman(G.turn)&&!busy&&G.phase!=="over";
- $("roundTag").textContent=L().round(G.round);
+ $("roundTag").textContent=t(seka()?"sekaTitle":"kTitle")+" · "+L().round(G.round);
  $("handover").hidden=!(G.handover&&myTurn);$("hand").hidden=G.phase==="over"&&G.over.w===V;if(G.handover&&myTurn){$("hoTitle").textContent=L().passTo(seatName(G.turn));$("hoSub").textContent=t("passSub")}
  // other players
  const opps=$("opps");opps.innerHTML="";
  G.seats.forEach((s,i)=>{if(i===V)return;const d=document.createElement("div");d.className="opp"+(G.turn===i&&G.phase!=="over"?" turn":"");
   d.innerHTML=`<span class="minis"></span><span><b></b><br><span class="cnt"></span></span>`;const mini=d.querySelector(".minis");for(let k=0;k<Math.min(G.hands[i].length,8);k++)mini.appendChild(cardEl(null,{back:true}));
   d.querySelector("b").textContent=seatName(i);d.querySelector(".cnt").textContent=L().cards(G.hands[i].length);
-  if(opened(i)){const bd=document.createElement("span");bd.className="badge";bd.textContent=t("opened");d.appendChild(bd)}opps.appendChild(d)});
+  if(!seka()&&opened(i)){const bd=document.createElement("span");bd.className="badge";bd.textContent=t("opened");d.appendChild(bd)}opps.appendChild(d)});
  // face-up groups on the table (and every hand when the round is over)
  const mb=$("melds");mb.innerHTML="";const selCard=sel.size===1?(G.hands[G.turn]||[]).find(c=>sel.has(c.id)):null;
  const swapTargets=myTurn&&G.phase==="play"?swapsFor(G.turn,selCard):[];
@@ -759,7 +819,7 @@ function render(){if(!G)return;const n=G.seats.length,V=viewer(),myTurn=isHuman(
 }
 const say=(k,arg)=>{msg=typeof k==="function"?k:(arg!=null?L()[k](arg):t(k));msgErr=true;render()};
 function tapDiscardPile(){if(!(isHuman(G.turn)&&G.phase==="draw"&&!busy))return;const me=G.turn,top=G.discard[G.discard.length-1];
- if(!opened(me)){const h14=G.hands[me].concat([top]);const can=kOpenings(h14,top.id).length||winDiscards(h14,kNeed(G.table[me]),0,top.id).length;if(!can){say("eNo41");return}}
+ if(!opened(me)){const h14=G.hands[me].concat([top]);const can=kOpenings(h14,top.id).length||winDiscards(h14,needOf(me),0,top.id).length;if(!can){say("eNo41");return}}
  actTake();sel.clear();msg="";saveG();render()}
 $("stockBtn").onclick=()=>{if(!(isHuman(G.turn)&&G.phase==="draw"&&!busy))return;actDraw();sel.clear();msg="";saveG();render()};
 $("discardBtn").onclick=()=>{if(sel.size!==1){say("eOne");return}const err=actDiscard([...sel][0]);if(err){say(err);return}sel.clear();msg="";render();resumeTurn()};
@@ -782,7 +842,7 @@ function renderJoker(myTurn){const box=$("jokerBox");if(!pend||!myTurn||G.phase!
  const r=document.createElement("div");r.className="row";const ok=document.createElement("button");ok.type="button";ok.className="btn primary";ok.textContent=t("show41");ok.disabled=total()<41;
  ok.onclick=()=>{const p=pend;pend=null;actShow(p.groups,p.groups.map((g,i)=>p.opts[i].length?p.opts[i][p.ch[i]].as:null));sel.clear();msg="";saveG();render()};
  const bk=document.createElement("button");bk.type="button";bk.className="btn ghost";bk.textContent=t("back");bk.onclick=()=>{pend=null;render()};r.appendChild(ok);r.appendChild(bk);box.appendChild(r)}
-function canFinish(){const me=G.turn;return G.phase==="show"&&winDiscards(G.hands[me],kNeed(G.table[me]),0,G.took).length>0}
+function canFinish(){const me=G.turn;return G.phase==="show"&&winDiscards(G.hands[me],needOf(me),0,G.took).length>0}
 $("finishBtn").onclick=()=>{if(sel.size!==1){say("ePickLast");return}const id=[...sel][0],me=G.turn;
  if(id===G.took){say("eSameCard");return}if(!finishWith(G.hands[me].filter(c=>c.id!==id),me)){say("eFinish");return}
  const err=actDiscard(id);if(err){say(err);return}sel.clear();msg="";render()};
@@ -818,11 +878,11 @@ handEl.addEventListener("contextmenu",e=>e.preventDefault());
 
 /* ---------- scores ---------- */
 function renderScores(){const p=players[cur];$("scoreTitle").textContent=L().scoreTitle(pname(cur));
- $("statTiles").innerHTML=[["total",p.pts],["kwins",p.kWins||0],["kvice",p.kVice||0],["krounds",p.kRounds||0]].map(([k,v])=>`<div class="stat"><span class="muted small">${esc(t(k))}</span><b>${v}</b></div>`).join("");
+ $("statTiles").innerHTML=[["total",p.pts],["kwins",p.kWins||0],["kvice",p.kVice||0],["krounds",p.kRounds||0],["swins",p.sWins||0],["svice",p.sVice||0],["srounds",p.sRounds||0],["iwins",p.iWins||0],["irounds",p.iRounds||0]].map(([k,v])=>`<div class="stat"><span class="muted small">${esc(t(k))}</span><b>${v}</b></div>`).join("");
  $("bothTitle").textContent=pname(0)+" · "+pname(1);const a=players[0].pts,b=players[1].pts;
  $("vs").innerHTML=[0,1].map(i=>{const v=players[i].pts,lead=v>0&&a!==b&&v===Math.max(a,b);return `<div class="stat${lead?" lead":""}"><span class="small">${esc(pname(i))}${lead?" ★":""}</span><b>${v}</b></div>`}).join("");
  $("guestLine").textContent=players[2].pts>0?L().guestLine(pname(2),players[2].pts):"";
- $("hist").innerHTML=p.hist.length?p.hist.map(h=>`<div><span><span class="muted small">${esc(h.d)}</span><br>${esc(h.v?t("histVice"):t("histWin"))}</span><b>${esc(L().pts(h.pts))}</b></div>`).join(""):`<p class="muted">${esc(t("none"))}</p>`;
+ $("hist").innerHTML=p.hist.length?p.hist.map(h=>`<div><span><span class="muted small">${esc(h.d)}</span><br>${esc(h.g==="i"?t("histIWin"):h.g==="s"?(h.v?t("histSVice"):t("histSWin")):(h.v?t("histVice"):t("histWin")))}</span><b>${esc(L().pts(h.pts))}</b></div>`).join(""):`<p class="muted">${esc(t("none"))}</p>`;
  const lb=ls.get("lastBackup",null);$("lastBackup").textContent=lb?L().lastB(lb):t("noB");$("restoreMsg").textContent=""}
 $("backupBtn").onclick=async()=>{if(await downloadJSON({app:"card-games",version:1,savedAt:new Date().toISOString(),players,cur},"card-games-backup-"+dayStr()+".json")){ls.set("lastBackup",dayStr());renderScores();toast("✓")}};
 $("restoreInput").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
@@ -843,6 +903,97 @@ function cheer(title,sub,pts){$("cheerTitle").textContent=title;$("cheerSub").te
   if((n<40||fly.length)&&now-t0<16000)run=requestAnimationFrame(step);else run=null}
  cancelAnimationFrame(run);run=requestAnimationFrame(step)}
 $("cheerBtn").onclick=()=>{cancelAnimationFrame(run);run=null;$("cheer").hidden=true;const c=$("cheerCanvas");c.getContext("2d").clearRect(0,0,c.width,c.height)};
+
+/* ================= እንጀራ በወጥ (Injera Bewet) ================= */
+const ival=c=>c.j?0:c.r;
+/* most ወጥ cards that split into groups each equal to v (one card the same number, or several adding up). Returns [[indexes]] */
+function iCover(cards,v){const n=cards.length,vals=cards.map(ival),used=new Array(n).fill(false);let best={cnt:0,groups:[]},nodes=0;
+ const dfs=(cnt,groups,left)=>{if(++nodes>60000)return;if(cnt>best.cnt)best={cnt,groups:groups.map(g=>g.slice())};if(cnt+left<=best.cnt)return;
+  let i=0;while(i<n&&used[i])i++;if(i>=n)return;
+  const opts=[];if(vals[i]>0&&vals[i]<=v){const rec=(k,sum,acc)=>{if(opts.length>200)return;if(sum===v){opts.push(acc.slice());return}for(let m=k;m<n;m++){if(used[m]||!vals[m]||sum+vals[m]>v)continue;acc.push(m);rec(m+1,sum+vals[m],acc);acc.pop()}};rec(i+1,vals[i],[i])}
+  for(const g of opts){g.forEach(m=>used[m]=true);groups.push(g);dfs(cnt+g.length,groups,left-g.length);groups.pop();g.forEach(m=>used[m]=false)}
+  used[i]=true;dfs(cnt,groups,left-1);used[i]=false};
+ dfs(0,[],n);return best.groups}
+const iTop=o=>{const st=G.piles[o];return st.length?st[st.length-1][0]:null};
+const iCount=o=>G.piles[o].reduce((a,st)=>a+st.length,0);
+function iOwners(d){return G.seats.map((_,o)=>o).filter(o=>{if(o===G.turn)return false;const tp=iTop(o);return tp&&(d.j?tp.j:(!tp.j&&tp.r===d.r))})}
+function iBest(){const d=G.drawn;if(!d)return{groups:[],owners:[]};return{groups:d.j?[]:iCover(G.wot,d.r),owners:iOwners(d)}}
+const iMore=()=>{const b=iBest();return b.groups.length>0||b.owners.length>0};
+let pickW=new Set(),pickO=new Set(),hintW=new Set(),hintO=new Set(),imsg="",imsgErr=false,iQuitArm=false;
+function newGameI(){const seats=[{kind:"human",pid:cur}];for(let k=0;k<setup.n-1;k++){const o=setup.seats[k];seats.push(o==="cpu"?{kind:"cpu"}:o==="v"?{kind:"v"}:{kind:"human",pid:+o})}
+ G={game:"injera",seats,round:0,first:Math.floor(Math.random()*seats.length)-1,done:false};dealI()}
+function dealI(){const n=G.seats.length;let deck=kShuffle(kDeck(n<=2?1:2));G.round++;G.first=(G.first+1+n)%n;
+ const wot=[];while(wot.length<4){const c=deck.pop();if(c.j)deck.splice(Math.floor(Math.random()*(deck.length+1)),0,c);else wot.push(c)}
+ G.wot=wot;G.circle=deck;G.piles=G.seats.map(()=>[]);G.turn=G.first;G.phase="draw";G.drawn=null;G.gain=[];G.last=false;G.log="";G.over=null;
+ pickW.clear();pickO.clear();hintW.clear();hintO.clear();imsg="";saveG()}
+function iDraw(slot){const c=G.circle[slot];if(!c)return;G.circle[slot]=null;G.drawn=c;G.gain=[];G.phase="capture";G.last=G.circle.every(x=>!x);G.log="";
+ pickW.clear();pickO.clear();hintW.clear();hintO.clear();
+ if(c.j){G.gain.push(...G.wot);G.wot=[];G.log=L().iJoker(seatName(G.turn));
+  iOwners(c).forEach(o=>{G.piles[o].forEach(st=>G.gain.push(...st));G.piles[o]=[];G.log=L().iJokerPile(seatName(G.turn),seatName(o))});
+  iSettle(true)}
+ saveG()}
+function iTake(wIds,owners){const ws=G.wot.filter(c=>wIds.includes(c.id));G.wot=G.wot.filter(c=>!wIds.includes(c.id));G.gain.push(...ws);
+ owners.forEach(o=>{const st=G.piles[o].pop();if(st)G.gain.push(...st)});pickW.clear();pickO.clear();hintW.clear();hintO.clear();
+ if(!iMore())iSettle(true);saveG()}
+function iSettle(won){const me=G.turn,d=G.drawn;
+ if(G.last){G.gain.push(...G.wot);G.wot=[];won=true;G.log=L().iLast(seatName(me))}
+ if(won){G.piles[me].push([d].concat(G.gain));if(!G.last&&!d.j)G.log=L().iTook(seatName(me),G.gain.length+1)}else{G.wot.push(d);G.log=L().iMiss(seatName(me))}
+ G.drawn=null;G.gain=[];
+ if(G.last||G.circle.every(x=>!x)){endI();return}
+ if(won)G.phase="draw";else{G.turn=(G.turn+1)%G.seats.length;G.phase="draw"}}
+function endI(){G.phase="over";const counts=G.seats.map((_,o)=>iCount(o)),mx=Math.max(...counts),top=counts.map((c,o)=>c===mx?o:-1).filter(o=>o>=0);
+ const w=top.length===1?top[0]:null;G.over={w,counts};
+ G.seats.forEach((s,i)=>{if(s.kind!=="human")return;const p=players[s.pid];p.iRounds=(p.iRounds||0)+1;const d=dayStr();if(!p.days.includes(d))p.days.push(d);
+  if(i===w){p.pts+=20;p.iWins=(p.iWins||0)+1;p.hist.unshift({d,v:0,pts:20,g:"i"});p.hist=p.hist.slice(0,30)}saveP(s.pid)});
+ saveG();if(w!=null&&G.seats[w].kind!=="cpu")setTimeout(()=>cheer(L().iWins(seatName(w)),G.seats.map((_,o)=>seatName(o)+" "+counts[o]).join(" · "),20),600)}
+/* the iPad player (2-player games only) */
+async function cpuTurnI(){if(busy)return;busy=true;
+ while(G&&G.game==="injera"&&G.phase!=="over"&&!isHuman(G.turn)&&view==="injera"){
+  renderI();await wait(800);
+  if(G.phase==="draw"){const free=G.circle.map((c,i)=>c?i:-1).filter(i=>i>=0);iDraw(free[Math.floor(Math.random()*free.length)]);renderI();await wait(900);continue}
+  if(G.phase==="capture"){const b=iBest();if(b.groups.length||b.owners.length){b.groups.forEach(g=>g.forEach(k=>hintW.add(G.wot[k].id)));b.owners.forEach(o=>hintO.add(o));renderI();await wait(1200);
+    iTake([].concat(...b.groups).map(k=>G.wot[k].id),b.owners)}else{iSettle(false);saveG()}renderI();await wait(500)}}
+ busy=false;renderI()}
+function resumeI(){if(!G||G.game!=="injera"||G.phase==="over"||busy||view!=="injera")return;if(!isHuman(G.turn))cpuTurnI()}
+const cName=c=>c.j?"Joker":RL(c.r)+SYM[c.s]+"︎";
+function renderI(){if(!G||G.game!=="injera")return;const myTurn=isHuman(G.turn)&&!busy&&G.phase!=="over",cap=myTurn&&G.phase==="capture";
+ $("iTag").textContent=t("iTitle")+" · "+L().round(G.round);
+ // players and their መደብ
+ const pb=$("iPlayers");pb.innerHTML="";
+ G.seats.forEach((s,o)=>{const tp=iTop(o),canPick=cap&&o!==G.turn&&tp;const box=document.createElement(canPick?"button":"div");if(canPick)box.type="button";
+  box.className="mpile"+(o===G.turn&&G.phase!=="over"?" turn":"");
+  if(tp){const ce=cardEl(tp);if(pickO.has(o))ce.classList.add("pick");if(hintO.has(o))ce.classList.add("hint");box.appendChild(ce)}else{const e=document.createElement("div");e.className="nop";box.appendChild(e)}
+  const txt=document.createElement("span");txt.innerHTML="<b></b><br><span class='cnt'></span>";txt.querySelector("b").textContent=seatName(o)+" · "+t("mdebL");txt.querySelector(".cnt").textContent=L().cards(iCount(o));box.appendChild(txt);
+  if(canPick)box.onclick=()=>{pickO.has(o)?pickO.delete(o):pickO.add(o);imsg="";renderI()};pb.appendChild(box)});
+ // the circle (እንጀራ)
+ const ring=$("ring");[...ring.querySelectorAll(".slot")].forEach(e=>e.remove());const N=G.circle.length,cw=N>60?30:N>40?38:44;
+ G.circle.forEach((c,i)=>{if(!c)return;const a=360*i/N,rad=a*Math.PI/180;const b=cardEl(null,{back:true});const el=document.createElement("button");el.type="button";
+  el.className="card back slot";el.style.setProperty("--cw",cw+"px");el.style.left=(50+43*Math.cos(rad)).toFixed(2)+"%";el.style.top=(50+43*Math.sin(rad)).toFixed(2)+"%";
+  el.style.transform="translate(-50%,-50%) rotate("+(a+90).toFixed(1)+"deg)";el.disabled=!(myTurn&&G.phase==="draw");el.setAttribute("aria-label","Face-down card");
+  el.onclick=()=>{if(!(isHuman(G.turn)&&G.phase==="draw"&&!busy))return;iDraw(i);imsg="";renderI();resumeI()};ring.insertBefore(el,ring.firstChild)});
+ // the ወጥ
+ const wb=$("wot");wb.innerHTML="";wb.className="wot"+(G.wot.length>18?" lots":G.wot.length>9?" many":"");
+ if(!G.wot.length){const e=document.createElement("div");e.className="empty";e.textContent=t("iEmpty");wb.appendChild(e)}
+ G.wot.forEach(c=>{const b=cardEl(c,{button:true});b.disabled=!cap;if(pickW.has(c.id))b.classList.add("pick");if(hintW.has(c.id))b.classList.add("hint");
+  b.onclick=()=>{if(!cap)return;pickW.has(c.id)?pickW.delete(c.id):pickW.add(c.id);imsg="";renderI()};wb.appendChild(b)});
+ // drawn card
+ const dr=$("iDrawn");dr.innerHTML="";if(G.drawn)dr.appendChild(cardEl(G.drawn));$("iDrawnL").textContent=G.drawn?L().iDrewL(cName(G.drawn)):"";$("iGain").textContent=G.drawn&&G.gain.length?L().iGainL(G.gain.length):"";
+ let st="";if(G.phase!=="over"){if(!isHuman(G.turn))st=L().iOtherSt(seatName(G.turn));else st=G.phase==="draw"?L().iDrawSt(seatName(G.turn)):L().iCapSt(seatName(G.turn))}$("iStatus").textContent=st;
+ const m=$("iMsg");m.textContent=imsg||G.log||"";m.className="msg "+(imsg&&imsgErr?"err":"log");
+ ["iTakeBtn","iNoneBtn","iHintBtn"].forEach(id=>$(id).hidden=!cap);
+ $("iQuitBtn").textContent=iQuitArm?t("quitC"):t("quit");$("iOver").hidden=G.phase!=="over";
+ if(G.phase==="over"){const o=G.over;$("iOverTitle").textContent=o.w==null?t("iTie"):L().iWins(seatName(o.w));$("iOverSub").textContent=G.seats.map((_,k)=>seatName(k)+": "+o.counts[k]).join(" · ")}}
+const isay=(k)=>{imsg=t(k);imsgErr=true;renderI()};
+$("iTakeBtn").onclick=()=>{const d=G.drawn;if(!d)return;if(!pickW.size&&!pickO.size){isay("iePick");return}
+ if([...pickO].some(o=>!iOwners(d).includes(o))){isay("ieTop");return}
+ const ws=G.wot.filter(c=>pickW.has(c.id));if(ws.length&&iCover(ws,d.r).reduce((a,g)=>a+g.length,0)!==ws.length){isay("ieSum");return}
+ imsg="";iTake(ws.map(c=>c.id),[...pickO]);renderI();resumeI()};
+$("iNoneBtn").onclick=()=>{if(iMore()){isay("ieMore");return}imsg="";iSettle(G.gain.length>0);saveG();renderI();resumeI()};
+$("iHintBtn").onclick=()=>{const b=iBest();hintW.clear();hintO.clear();if(b.owners.length)hintO.add(b.owners[0]);else if(b.groups.length)b.groups[0].forEach(k=>hintW.add(G.wot[k].id));
+ if(!hintW.size&&!hintO.size){isay("iHintNone");return}imsg=t("iHintShow");imsgErr=false;renderI()};
+$("iAgainBtn").onclick=()=>{dealI();renderI();resumeI()};
+$("iChangeBtn").onclick=()=>{G.done=true;saveG();show("setup");renderSetup()};
+$("iQuitBtn").onclick=()=>{if(!iQuitArm){iQuitArm=true;renderI();setTimeout(()=>{iQuitArm=false;if(view==="injera")renderI()},3000);return}iQuitArm=false;G.done=true;saveG();show("setup");renderSetup()};
 
 applyLang();show("home");
 })();
