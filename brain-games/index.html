@@ -298,6 +298,8 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 #cheer .msg h2{font-size:2rem;color:var(--green)}
 #cheer .msg .pts{font-size:1.5rem;font-weight:700;color:var(--gold)}
 @media (prefers-reduced-motion:reduce){.slots.wrong{animation:none}}
+
+.rate{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-weight:700;padding:6px 0}.rate button{min-width:64px;min-height:52px;font-size:1.6rem;border-radius:999px;border:2px solid var(--line);background:var(--surface);cursor:pointer}.rate button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 </style>
 <style>.mm-bar{max-width:900px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}.mm-link{display:inline-flex;align-items:center;gap:10px;min-height:50px;padding:6px 20px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700;font-size:1rem;text-decoration:none}.mm-link:hover{border-color:var(--green)}.mm-link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.mm-link .ic{font-size:1.2rem;line-height:1}</style>
 </head>
@@ -537,7 +539,7 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
       <div class="dm-side" id="dmSideD"><span class="swatch pd"></span><b id="dmNameD"></b><span class="muted small"><span data-t="dmCaptured"></span>: <b id="dmCapD">0</b></span></div>
       <div class="feedback" id="dmStatus" aria-live="polite" style="text-align:center;font-size:1.3rem"></div>
       <div class="muted" id="dmMsg" style="text-align:center;min-height:1.4em"></div>
-      <div class="panel result" id="dmOver" hidden><div class="actions"><button class="btn primary" type="button" id="dmAgain" data-t="dmAgain"></button><button class="btn ghost" type="button" id="dmChange" data-t="dmChange"></button></div></div>
+      <div class="panel result" id="dmOver" hidden><div class="rate" id="dmRate" hidden><span id="dmRateQ"></span><button type="button" data-v="yes" aria-label="Yes">👍</button><button type="button" data-v="no" aria-label="No">👎</button></div><div class="actions"><button class="btn primary" type="button" id="dmAgain" data-t="dmAgain"></button><button class="btn ghost" type="button" id="dmChange" data-t="dmChange"></button></div></div>
       <div class="actions">
         <button class="btn gold" type="button" id="dmHint" data-t="hint"></button>
         <button class="btn ghost" type="button" id="dmUndo" data-t="dmUndo"></button>
@@ -1287,8 +1289,15 @@ function dmBest(b,col,level,rules){const mv=dmMoves(b,col);if(!mv.length)return 
  return best}
 
 function dmNames(){const g=P().dama;if(!g)return{d:pname(cur),l:t("dmIpad")};return{d:pname(g.p1),l:g.mode==="cpu"?t("dmIpad"):pname(g.p2)}}
+/* 👍 / 👎 after a game (public site only: needs the anonymous counter, and counting switched on) */
+function dmRenderRate(g){const box=document.getElementById("dmRate");if(!box)return;const on=!!(window.gamesTrack&&window.gamesCounting&&!window.gamesCounting.off());
+ const am=document.documentElement.lang==="am";document.getElementById("dmRateQ").textContent=g&&g.rated?(am?"እናመሰግናለን!":"Thank you!"):(am?"ጨዋታውን ወደዱት?":"Did you enjoy this game?");
+ box.querySelectorAll("button").forEach(b=>b.hidden=!!(g&&g.rated));box.hidden=!(g&&g.over&&on)}
+document.addEventListener("click",e=>{const b=e.target.closest("#dmRate button");if(!b)return;const g=P().dama;if(!g||!g.over||g.rated)return;
+ try{window.gamesTrack("feedback",{game:"dama",players:2,vs:g.mode==="cpu"?"ipad":"people",liked:b.dataset.v})}catch(err){}g.rated=true;save();dmRenderRate(g)});
 function dmStart(){
  const rules=DM_RULES;
+ try{window.gamesTrack&&window.gamesTrack("game-start",{game:"dama",players:2,vs:dmSetup.mode==="cpu"?"ipad":"people",level:dmSetup.mode==="cpu"?dmSetup.level:"-"})}catch(e){}
  P().dama={mode:dmSetup.mode,level:dmSetup.level,p1:cur,p2:dmSetup.mode==="two"?dmSetup.p2:null,rules,board:dmInitBoard(),turn:"d",undo:[],moves:0,quiet:0,over:null,last:null,cap:{d:0,l:0}};
  dmSel=null;dmSeqs=null;dmHintMove=null;save();
 }
@@ -1329,6 +1338,7 @@ function dmCheckEnd(){
  if(!dmMoves(g.board,g.turn,g.rules).length){g.over=dmOpp(g.turn)}
  else if(g.quiet>=80)g.over="draw";
  if(!g.over)return;
+ try{window.gamesTrack&&window.gamesTrack("round-end",{game:"dama",players:2,vs:g.mode==="cpu"?"ipad":"people",result:g.over==="draw"?"draw":(g.mode==="cpu"&&g.over==="l"?"ipad":"player")})}catch(e){}
  const n=dmNames();
  if(g.over==="draw"){const d=dayStr();P().st.hist.unshift({d,txt:"dama",dm:"draw",pts:0});P().st.hist=P().st.hist.slice(0,30);save();return}
  let pts=0,who=null;
@@ -1378,7 +1388,7 @@ function renderDama(){
  $("dmHint").disabled=!dmHumanTurn()||dmThinking;
  $("dmNew").textContent=dmArmNew?t("dmNewC"):t("dmNew");
  $("dmLevelTag").textContent=g.mode==="cpu"?t("dmVsCpu")+" · "+t("dm_"+g.level):t("dmTwo");
- $("dmOver").hidden=!g.over;
+ $("dmOver").hidden=!g.over;dmRenderRate(g);
 }
 const CROWN='<svg viewBox="0 0 24 24"><path d="M3 18h18l-1.6-9-4.4 3.6L12 6l-3 6.6L4.6 9z" fill="currentColor"/><rect x="3" y="19.2" width="18" height="2.2" rx="1" fill="currentColor"/></svg>';
 let dmForceSetup=false;
