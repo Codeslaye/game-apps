@@ -169,6 +169,17 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
 #cheer .msg{position:relative;background:var(--surface);border:4px solid var(--gold);border-radius:24px;padding:28px 32px;text-align:center;display:flex;flex-direction:column;gap:10px;max-width:min(92vw,480px)}
 #cheer .msg h2{font-size:2rem;color:var(--green)}#cheer .pts{font-size:1.5rem;font-weight:700;color:var(--gold)}
 @media (prefers-reduced-motion:reduce){.step.shake{animation:none}}
+.shelfbtn{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--surface);border:2px solid var(--green);border-radius:var(--r);padding:16px 22px;text-align:left}
+.shelfbtn b{font-size:1.5rem;font-variant-numeric:tabular-nums}
+.meter{height:12px;border-radius:999px;background:var(--line);overflow:hidden;min-width:160px;flex:1 1 160px}.meter i{display:block;height:100%;background:var(--gold)}
+.shead{display:flex;flex-direction:column;gap:4px;text-align:center}.shead .geez{font-family:var(--f-geez);font-weight:700;font-size:1.5rem;color:var(--green)}
+.sec h3{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;margin-bottom:12px}.sec h3 small{font-weight:400;color:var(--muted);font-size:.95rem}
+.books{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.bk{min-height:72px;border-radius:14px;border:2px solid var(--line);background:var(--bg);padding:8px 12px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:2px;position:relative}
+.bk .a{font-family:var(--f-geez);font-weight:700;font-size:1.05rem;line-height:1.3}.bk .e{font-size:.85rem;color:var(--muted)}
+.bk.lit{border-color:var(--gold);background:var(--gold-soft)}.bk.lit::after{content:"✓ " attr(data-n);position:absolute;top:6px;right:10px;font-weight:700;color:var(--green);font-size:.85rem}
+.bk:disabled{cursor:default}.bk:not(:disabled):hover{border-color:var(--green)}
+.bkname{font-family:var(--f-geez);font-size:1.9rem;font-weight:700;line-height:1.35;color:var(--green);text-wrap:balance}
 </style>
 <style>.mm-bar{max-width:900px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}.mm-link{display:inline-flex;align-items:center;gap:10px;min-height:50px;padding:6px 20px;border-radius:999px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700;font-size:1rem;text-decoration:none}.mm-link:hover{border-color:var(--green)}.mm-link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}.mm-link .ic{font-size:1.2rem;line-height:1}</style>
 </head>
@@ -205,13 +216,22 @@ html[lang="am"] .label{text-transform:none;letter-spacing:0}
     <button class="game" type="button" data-game="quiz"><span class="ic">ጥ</span><h2 data-t="quizT"></h2><span class="muted" data-t="quizD"></span><span class="st" id="st-quiz"></span><span class="go" data-t="play"></span></button>
     <button class="game" type="button" data-game="who"><span class="ic">?</span><h2 data-t="whoT"></h2><span class="muted" data-t="whoD"></span><span class="st" id="st-who"></span><span class="go" data-t="play"></span></button>
     <button class="game" type="button" data-game="story"><span class="ic">፩</span><h2 data-t="storyT"></h2><span class="muted" data-t="storyD"></span><span class="st" id="st-story"></span><span class="go" data-t="play"></span></button>
+    <button class="game" type="button" data-game="books"><span class="ic">መ</span><h2 data-t="booksT"></h2><span class="muted" data-t="booksD"></span><span class="st" id="st-books"></span><span class="go" data-t="play"></span></button>
   </div>
+  <button class="shelfbtn" type="button" id="goShelf"><span><span class="label" data-t="shelfT"></span><br><b id="homeShelf"></b></span><span class="meter" aria-hidden="true"><i id="homeMeter"></i></span><span class="go" style="font-weight:700;color:var(--green)" data-t="seeShelf"></span></button>
   <button class="scorebtn" type="button" id="goScores"><span><span class="label" data-t="scores"></span><br><b id="homePts">0</b> <span data-t="points"></span></span><span class="go" style="font-weight:700;color:var(--green)" data-t="seeScores"></span></button>
 </section>
 
 <section class="view" id="v-cat" hidden>
   <div class="bar"><button class="btn ghost" type="button" data-home data-t="home"></button></div>
   <div class="card"><h2 data-t="pickCat"></h2><div class="chips" id="cats"></div><div><button class="btn primary" type="button" id="startQuiz" data-t="start"></button></div></div>
+</section>
+
+<section class="view" id="v-shelf" hidden>
+  <div class="bar"><button class="btn ghost" type="button" data-home data-t="home"></button><span class="muted" id="shelfCount"></span></div>
+  <div class="shead"><span class="geez">የኢትዮጵያ መጽሐፍ ቅዱስ</span><span class="muted">የብሉይና የሐዲስ ኪዳን መጻሕፍት · <span data-t="shelfSub"></span></span></div>
+  <p class="muted" data-t="shelfHow" style="margin:0;text-align:center"></p>
+  <div id="shelfSecs" class="stack"></div>
 </section>
 
 <section class="view" id="v-play" hidden>
@@ -388,6 +408,234 @@ const STORY=[
  {id:"lostson",t:["የጠፋው ልጅ","The lost son"],r:"Luke|15:11–32",s:[["ታናሹ ልጅ ድርሻውን ጠየቀ","The younger son asks for his share"],["ገንዘቡን በሩቅ ሀገር አባከነ","He wastes it in a far country"],["ተርቦ እሪያዎችን ጠበቀ","Hungry, he looks after pigs"],["ወደ አባቱ ቤት ተመለሰ","He goes back to his father"],["አባቱ ግብዣ አደረገለት","His father throws a feast"]]}
 ];
 
+/* ================= The Ethiopian Orthodox Tewahedo canon, as the family listed it =================
+   [key, full Amharic name as written in the list, short Amharic name for references, English name, section]
+   Sections: ot = የብሉይ ኪዳን መጻሕፍት, dc = የቀኖና መጻሕፍት, nt = የሐዲስ ኪዳን መጻሕፍት */
+const CANON=[
+ ["Gen","ኦሪት፡ዘፍጥረት","ዘፍጥረት","Genesis","ot"],["Exod","ኦሪት፡ዘጸአት","ዘጸአት","Exodus","ot"],["Lev","ኦሪት፡ዘሌዋውያን","ዘሌዋውያን","Leviticus","ot"],
+ ["Num","ኦሪት፡ዘኍልቍ","ዘኍልቍ","Numbers","ot"],["Deut","ኦሪት፡ዘዳግም","ዘዳግም","Deuteronomy","ot"],["Josh","መጽሐፈ፡ኢያሱ፡ወልደ፡ነዌ","ኢያሱ","Joshua","ot"],
+ ["Judg","መጽሐፈ፡መሳፍንት","መሳፍንት","Judges","ot"],["Ruth","መጽሐፈ፡ሩት","ሩት","Ruth","ot"],["1 Sam","መጽሐፈ፡ሳሙኤል፡ቀዳማዊ","1 ሳሙኤል","1 Samuel","ot"],
+ ["2 Sam","መጽሐፈ፡ሳሙኤል፡ካልዕ","2 ሳሙኤል","2 Samuel","ot"],["1 Kgs","መጽሐፈ፡ነገሥት፡ቀዳማዊ","1 ነገሥት","1 Kings","ot"],["2 Kgs","መጽሐፈ፡ነገሥት፡ካልዕ","2 ነገሥት","2 Kings","ot"],
+ ["1 Chr","መጽሐፈ፡ዜና፡መዋዕል፡ቀዳማዊ","1 ዜና መዋዕል","1 Chronicles","ot"],["2 Chr","መጽሐፈ፡ዜና፡መዋዕል፡ካልዕ","2 ዜና መዋዕል","2 Chronicles","ot"],
+ ["Ezra","መጽሐፈ፡ዕዝራ","ዕዝራ","Ezra","ot"],["Neh","መጽሐፈ፡ነሐምያ","ነሐምያ","Nehemiah","ot"],["Esth","መጽሐፈ፡አስቴር","አስቴር","Esther","ot"],
+ ["Job","መጽሐፈ፡ኢዮብ","ኢዮብ","Job","ot"],["Ps","መዝሙረ፡ዳዊት","መዝሙር","Psalms","ot"],["Prov","መጽሐፈ፡ምሳሌ","ምሳሌ","Proverbs","ot"],
+ ["Tegs","መጽሐፈ፡ተግሣጽ","ተግሣጽ","Tegsas (Proverbs 25–31)","ot"],["Eccl","መጽሐፈ፡መክብብ","መክብብ","Ecclesiastes","ot"],
+ ["Song","ማሕልየ፡መሓልይ፡ዘሰሎሞን","ማሕልየ መሓልይ","Song of Songs","ot"],["Isa","ትንቢተ፡ኢሳይያስ","ኢሳይያስ","Isaiah","ot"],["Jer","ትንቢተ፡ኤርምያስ","ኤርምያስ","Jeremiah","ot"],
+ ["Lam","ሰቈቃወ፡ኤርምያስ","ሰቈቃወ ኤርምያስ","Lamentations","ot"],["Ezek","ትንቢተ፡ሕዝቅኤል","ሕዝቅኤል","Ezekiel","ot"],["Dan","ትንቢተ፡ዳንኤል","ዳንኤል","Daniel","ot"],
+ ["Hos","ትንቢተ፡ሆሴዕ","ሆሴዕ","Hosea","ot"],["Amos","ትንቢተ፡አሞጽ","አሞጽ","Amos","ot"],["Mic","ትንቢተ፡ሚክያስ","ሚክያስ","Micah","ot"],["Joel","ትንቢተ፡ኢዮኤል","ኢዮኤል","Joel","ot"],
+ ["Obad","ትንቢተ፡አብድዩ","አብድዩ","Obadiah","ot"],["Jonah","ትንቢተ፡ዮናስ","ዮናስ","Jonah","ot"],["Nah","ትንቢተ፡ናሆም","ናሆም","Nahum","ot"],
+ ["Hab","ትንቢተ፡ዕንባቆም","ዕንባቆም","Habakkuk","ot"],["Zeph","ትንቢተ፡ሶፎንያስ","ሶፎንያስ","Zephaniah","ot"],["Hag","ትንቢተ፡ሐጌ","ሐጌ","Haggai","ot"],
+ ["Zech","ትንቢተ፡ዘካርያስ","ዘካርያስ","Zechariah","ot"],["Mal","ትንቢተ፡ሚልክያስ","ሚልክያስ","Malachi","ot"],
+
+ ["Sut","መጽሐፈ፡ዕዝራ፡ሱቱኤል","ዕዝራ ሱቱኤል","Ezra Sutuel","dc"],["2Ezr","መጽሐፈ፡ዕዝራ፡ካልዕ","ዕዝራ ካልዕ","Second Ezra","dc"],["Tob","መጽሐፈ፡ጦቢት","ጦቢት","Tobit","dc"],
+ ["Jdt","መጽሐፈ፡ዮዲት","ዮዲት","Judith","dc"],["EsthD","መጽሐፈ፡አስቴር","አስቴር (ቀኖና)","Esther (the additions)","dc"],
+ ["1 Meq","መጽሐፈ፡መቃብያን፡ቀዳማዊ","1 መቃብያን","1 Meqabyan","dc"],["2 Meq","መጽሐፈ፡መቃብያን፡ካልዕ","2 መቃብያን","2 Meqabyan","dc"],["3 Meq","መጽሐፈ፡መቃብያን፡ሣልስ","3 መቃብያን","3 Meqabyan","dc"],
+ ["Sir","መጽሐፈ፡ሲራክ","ሲራክ","Sirach","dc"],["Man","ጸሎተ፡ምናሴ","ጸሎተ ምናሴ","Prayer of Manasseh","dc"],["RJer","ተረፈ፡ኤርሚያስ","ተረፈ ኤርሚያስ","Rest of Jeremiah","dc"],
+ ["Sus","ሶስና","ሶስና","Susanna","dc"],["Bar","መጽሐፈ፡ባሮክ","ባሮክ","Baruch","dc"],["Wis","መጽሐፈ፡ጥበብ","ጥበብ","Wisdom","dc"],
+ ["Three","መዝሙረ፡ሠለስቱ፡ደቂቅ","መዝሙረ ሠለስቱ ደቂቅ","Song of the Three Youths","dc"],["RDan","ተረፈ፡ዳንኤል","ተረፈ ዳንኤል","Rest of Daniel","dc"],
+ ["Jub","መጽሐፈ፡ኩፋሌ","ኩፋሌ","Jubilees","dc"],["Enoch","መጽሐፈ፡ሔኖክ","ሔኖክ","Enoch","dc"],
+
+ ["Matt","የማቴዎስ፡ወንጌል","ማቴዎስ","Matthew","nt"],["Mark","የማርቆስ፡ወንጌል","ማርቆስ","Mark","nt"],["Luke","የሉቃስ፡ወንጌል","ሉቃስ","Luke","nt"],
+ ["John","የዮሐንስ፡ወንጌል","ዮሐንስ","John","nt"],["Acts","የሐዋርያት፡ሥራ","የሐዋርያት ሥራ","Acts","nt"],["Rom","ወደሮሜ፡ሰዎች","ሮሜ","Romans","nt"],
+ ["1 Cor","1ኛ፡ወደቆሮንቶስ፡ሰዎች","1 ቆሮንቶስ","1 Corinthians","nt"],["2 Cor","2ኛ፡ወደቆሮንቶስ፡ሰዎች","2 ቆሮንቶስ","2 Corinthians","nt"],
+ ["Gal","ወደገላትያ፡ሰዎች","ገላትያ","Galatians","nt"],["Eph","ወደኤፌሶን፡ሰዎች","ኤፌሶን","Ephesians","nt"],["Phil","ወደፊልጵስዩስ፡ሰዎች","ፊልጵስዩስ","Philippians","nt"],
+ ["Col","ወደቆላስይስ፡ሰዎች","ቆላስይስ","Colossians","nt"],["1 Thess","1ኛ፡ወደተሰሎንቄ፡ሰዎች","1 ተሰሎንቄ","1 Thessalonians","nt"],["2 Thess","2ኛ፡ወደተሰሎንቄ፡ሰዎች","2 ተሰሎንቄ","2 Thessalonians","nt"],
+ ["1 Tim","1ኛ፡ወደ፡ጢሞቴዎስ","1 ጢሞቴዎስ","1 Timothy","nt"],["2 Tim","2ኛ፡ወደ፡ጢሞቴዎስ","2 ጢሞቴዎስ","2 Timothy","nt"],["Titus","ወደ፡ቲቶ","ቲቶ","Titus","nt"],
+ ["Phlm","ወደ፡ፊልሞና","ፊልሞና","Philemon","nt"],["Heb","ወደ፡ዕብራውያን","ዕብራውያን","Hebrews","nt"],["1 Pet","1ኛ፡የጴጥሮስ፡መልእክት","1 ጴጥሮስ","1 Peter","nt"],
+ ["2 Pet","2ኛ፡የጴጥሮስ፡መልእክት","2 ጴጥሮስ","2 Peter","nt"],["1 John","1ኛ፡የዮሐንስ፡መልእክት","1 ዮሐንስ","1 John","nt"],["2 John","2ኛ፡የዮሐንስ፡መልእክት","2 ዮሐንስ","2 John","nt"],
+ ["3 John","3ኛ፡የዮሐንስ፡መልእክት","3 ዮሐንስ","3 John","nt"],["Jas","የያዕቆብ፡መልእክት","ያዕቆብ","James","nt"],["Jude","የይሁዳ፡መልእክት","ይሁዳ","Jude","nt"],
+ ["Rev","የዮሐንስ፡ራእይ","ራእይ","Revelation","nt"]];
+const SECTIONS={ot:["የብሉይ ኪዳን መጻሕፍት","Old Testament"],dc:["የቀኖና መጻሕፍት","Deuterocanonical books"],nt:["የሐዲስ ኪዳን መጻሕፍት","New Testament"]};
+for(const c of CANON)BOOKS[c[0]]=[c[2],c[3]];
+
+/* which book a question, person or story belongs to on the bookshelf: b if given, else the book in its reference */
+const bookOf=x=>x.b||(x.r?x.r.split("|")[0]:"");
+for(const [id,b] of [["e9","Enoch"],["o14","Ps"],["e3","1 Kgs"],["t6","Matt"]]){const q=QUIZ.find(x=>x.id===id);if(q&&!q.b)q.b=b}
+
+/* ================= New questions across the whole canon =================
+   Row: [id, category, reference "Book|ch:vv", shelf book (if different from the reference), question am, question en,
+         correct am, correct en, wrong am, wrong en, wrong am, wrong en, wrong am, wrong en, note am?, note en?] */
+const QROWS=[
+/* ---------- Old Testament ---------- */
+["x1","ot","Exod|3:2","","እግዚአብሔር ለሙሴ የተገለጠለት በምን ውስጥ ነበር?","God appeared to Moses in what?","በሚነድ ቁጥቋጦ","A burning bush","በደመና","A cloud","በዓለት","A rock","በወንዝ","A river"],
+["x2","ot","Lev|19:18","","«ባልንጀራህን እንደ ራስህ ውደድ» የሚለው ትእዛዝ በብሉይ ኪዳን በየትኛው መጽሐፍ ተጽፏል?","Which Old Testament book first gives the command “Love your neighbor as yourself”?","ኦሪት ዘሌዋውያን","Leviticus","ኦሪት ዘፍጥረት","Genesis","መጽሐፈ ኢዮብ","Job","መጽሐፈ ሩት","Ruth"],
+["x3","ot","Lev|16:20–22","","በስርየት ቀን የሕዝቡን ኃጢአት ተሸክሞ ወደ ምድረ በዳ የሚለቀቀው ምን ነበር?","On the Day of Atonement, what was sent into the wilderness carrying the people's sins?","ፍየል","A goat","በግ","A sheep","ርግብ","A dove","ወይፈን","A bull"],
+["x4","ot","Num|22:28","","አህያው የተናገረው ለማን ነው?","Whose donkey spoke to him?","በለዓም","Balaam","ባላቅ","Balak","ኢያሱ","Joshua","ካሌብ","Caleb"],
+["x5","ot","Deut|34:1–4","","ሙሴ የተስፋይቱን ምድር ከየትኛው ተራራ ላይ ሆኖ ተመለከተ?","From which mountain did Moses look out over the Promised Land?","ናባው","Mount Nebo","ሲና","Mount Sinai","ቀርሜሎስ","Mount Carmel","ደብረ ታቦር","Mount Tabor"],
+["x6","ot","Deut|34:9","","ከሙሴ በኋላ እስራኤልን የመራው ማን ነው?","Who led Israel after Moses?","ኢያሱ","Joshua","አሮን","Aaron","ካሌብ","Caleb","ሳሙኤል","Samuel"],
+["x7","ot","Josh|2:1–6","","በኢያሪኮ ሁለቱን ሰላዮች የደበቀቻቸው ማን ናት?","Who hid the two spies in Jericho?","ረዓብ","Rahab","ዲቦራ","Deborah","ሩት","Ruth","ሚርያም","Miriam"],
+["x8","ot","Judg|7:7","","ጌዴዎን ምድያማውያንን ያሸነፈው በስንት ሰዎች ነው?","With how many men did Gideon defeat the Midianites?","300","300","3,000","3,000","30","30","10,000","10,000"],
+["x9","ot","Ruth|4:13","","ሩት በቤተ ልሔም ያገባችው ማንን ነው?","Whom did Ruth marry in Bethlehem?","ቦዔዝን","Boaz","ዖቤድን","Obed","እሴይን","Jesse","ኤሊሜሌክን","Elimelech"],
+["x10","ot","1 Sam|1:20","","ሐና ልጅ እንዲሰጣት ጸልያ የወለደችውን ልጅ ማን ብላ ጠራችው?","Hannah prayed for a son. What did she name him?","ሳሙኤል","Samuel","ሳኦል","Saul","ዳዊት","David","ዮናታን","Jonathan"],
+["x11","ot","2 Sam|18:9","","በአባቱ በዳዊት ላይ ያመፀውና ጠጉሩ በዛፍ የተያዘው ልጅ ማን ነው?","Which son of David rebelled against him and was caught in a tree by his hair?","አቤሴሎም","Absalom","ሰሎሞን","Solomon","አምኖን","Amnon","አዶንያስ","Adonijah"],
+["x12","ot","2 Sam|6:12–16","","ዳዊት በእግዚአብሔር ፊት እየዘመረ ታቦቱን ወደ የትኛው ከተማ አመጣው?","David danced before the Lord as he brought the Ark into which city?","ኢየሩሳሌም","Jerusalem","ኬብሮን","Hebron","ቤቴል","Bethel","ሴሎ","Shiloh","ታቦት በቤተ ክርስቲያናችን ሲወጣ የምናደርገው ዝማሬ ይህን ያስታውሳል።","Our singing when the tabot comes out recalls this."],
+["x13","ot","1 Kgs|3:9","","እግዚአብሔር «የምትፈልገውን ለምን» ሲለው ሰሎሞን የለመነው ምንድን ነው?","When God told Solomon to ask for anything, what did he ask for?","ጥበብና አስተዋይ ልብ","Wisdom and an understanding heart","ብዙ ሀብት","Great riches","ረጅም ዕድሜ","A long life","በጠላቶቹ ላይ ድል","Victory over his enemies"],
+["x14","ot","2 Kgs|5:14","","ንዕማን ከለምጹ እንዲነጻ በዮርዳኖስ ስንት ጊዜ ጠለቀ?","How many times did Naaman dip in the Jordan to be healed?","ሰባት ጊዜ","Seven times","ሦስት ጊዜ","Three times","አሥር ጊዜ","Ten times","አንድ ጊዜ","Once"],
+["x15","ot","1 Chr|1:1","","የ1 ዜና መዋዕል የትውልድ ዝርዝር በማን ስም ይጀምራል?","The family lists of 1 Chronicles begin with which name?","አዳም","Adam","አብርሃም","Abraham","ኖኅ","Noah","ዳዊት","David"],
+["x16","ot","1 Chr|22:8–10","","እግዚአብሔር ከዳዊት ይልቅ ቤተ መቅደሱን የሚሠራው ማን እንደሆነ ተናገረ?","God said who would build the temple instead of David?","ልጁ ሰሎሞን","His son Solomon","ነቢዩ ናታን","The prophet Nathan","አቤሴሎም","Absalom","ሳኦል","Saul"],
+["x17","ot","2 Chr|7:1","","ሰሎሞን በቤተ መቅደሱ ምረቃ ጸሎቱን ሲጨርስ ከሰማይ ምን ወረደ?","When Solomon finished praying at the temple's dedication, what came down from heaven?","እሳት","Fire","መና","Manna","ዝናብ","Rain","ርግብ","A dove"],
+["x18","ot","2 Chr|34:1","","ኢዮስያስ በነገሠ ጊዜ ዕድሜው ስንት ነበር?","How old was Josiah when he became king?","ስምንት ዓመት","Eight","ሠላሳ ዓመት","Thirty","አሥራ ስድስት ዓመት","Sixteen","አርባ ዓመት","Forty"],
+["x19","ot","Ezra|1:1–3","","አይሁድ ተመልሰው ቤተ መቅደሱን እንዲሠሩ የፈቀደው የፋርስ ንጉሥ ማን ነው?","Which king of Persia let the Jews go home and rebuild the temple?","ቂሮስ","Cyrus","ናቡከደነፆር","Nebuchadnezzar","ፈርዖን","Pharaoh","ሄሮድስ","Herod"],
+["x20","ot","Ezra|7:6","","ዕዝራ በምን ይታወቅ ነበር?","What was Ezra known as?","በሙሴ ሕግ የተማረ ጸሐፊ","A scribe skilled in the law of Moses","የጦር አለቃ","An army commander","ንጉሥ","A king","እረኛ","A shepherd"],
+["x21","ot","Neh|1:11","","ነሐምያ በፋርስ ንጉሥ ቤተ መንግሥት ውስጥ ሥራው ምን ነበር?","What was Nehemiah's job in the palace of the king of Persia?","የንጉሡ ጠጅ አሳላፊ","The king's cupbearer","ወጥ ቤት","The cook","በረኛ","The gatekeeper","ወታደር","A soldier"],
+["x22","ot","Neh|6:15","","የኢየሩሳሌም ቅጥር እንደገና ተሠርቶ በስንት ቀን ተጠናቀቀ?","Jerusalem's wall was rebuilt in how many days?","52 ቀን","52 days","7 ቀን","7 days","40 ቀን","40 days","ሦስት ዓመት","Three years"],
+["x23","ot","Esth|2:7","","አስቴርን ያሳደጋት የአጎቷ ልጅ ማን ነው?","Which cousin raised Esther?","መርዶክዮስ","Mordecai","ሐማ","Haman","ነሐምያ","Nehemiah","ዳንኤል","Daniel"],
+["x24","ot","Job|1:21","","«እግዚአብሔር ሰጠ፥ እግዚአብሔርም ወሰደ፤ የእግዚአብሔር ስም የተባረከ ይሁን» ያለው ማን ነው?","Who said, “The Lord gave, and the Lord has taken away; blessed be the name of the Lord”?","ኢዮብ","Job","ዳዊት","David","ኤልያስ","Elijah","ዮናስ","Jonah"],
+["x25","ot","Job|42:10","","በመከራው መጨረሻ እግዚአብሔር ለኢዮብ ምን ያህል መለሰለት?","At the end of his trials, how much did God give back to Job?","ከበፊቱ እጥፍ","Twice as much as before","ግማሹን","Half","ልክ እንደ በፊቱ","The same as before","ምንም","Nothing"],
+["x26","ot","Ps|23:1","","መዝሙር 23 «እግዚአብሔር … ነው» ብሎ ይጀምራል። የጎደለው ቃል የትኛው ነው?","Psalm 23 begins, “The Lord is my …”. Which word is missing?","እረኛዬ","Shepherd","ንጉሤ","King","ብርሃኔ","Light","ዓለቴ","Rock"],
+["x27","ot","Prov|1:1","","አብዛኞቹን ምሳሌዎች የጻፈው ማን ነው?","Who wrote most of the Proverbs?","ሰሎሞን","Solomon","ዳዊት","David","ሙሴ","Moses","ዕዝራ","Ezra"],
+["x28","ot","Prov|1:7","","መጽሐፈ ምሳሌ «እግዚአብሔርን መፍራት የ… መጀመሪያ ነው» ይላል።","Proverbs says the fear of the Lord is the beginning of what?","እውቀት","Knowledge","ሀብት","Riches","ክብር","Honor","ሰላም","Peace"],
+["x29","ot","Prov|31:10","Tegs","ምሳሌ 31 ደግ ሴት ዋጋዋ ከምን ይበልጣል ይላል?","Proverbs 31 says a good wife is worth far more than what?","ከቀይ ዕንቍ","Precious jewels","ከብዙ ከብት","Many cattle","ከትልቅ ቤት","A big house","ከሰፊ መሬት","Wide land","ተግሣጽ ከምሳሌ ምዕራፍ 25 እስከ 31 ያለውን ይይዛል።","Tegsas holds Proverbs chapters 25 to 31."],
+["x30","ot","Prov|25:21","Tegs","ጠላትህ ቢራብ ምን አድርግ ይላል?","If your enemy is hungry, what does it say to do?","እንጀራ አብላው","Give him bread","ተወው","Leave him","ሽሽ","Run away","ለሌሎች ንገር","Tell others","ተግሣጽ ከምሳሌ ምዕራፍ 25 እስከ 31 ያለውን ይይዛል።","Tegsas holds Proverbs chapters 25 to 31."],
+["x31","ot","Eccl|3:1","","«ለሁሉ ጊዜ አለው፥ ከሰማይ በታች ለሆነ ነገር ሁሉ ዘመን አለው» የሚለው የትኛው መጽሐፍ ነው?","Which book says, “To everything there is a season, a time for every purpose under heaven”?","መክብብ","Ecclesiastes","ኢዮብ","Job","ሩት","Ruth","ዳንኤል","Daniel"],
+["x32","ot","Eccl|1:1","","መክብብ (ሰባኪው) የማን ልጅ እንደሆነ ይናገራል?","The Preacher in Ecclesiastes calls himself the son of which king?","የዳዊት","David","የሳኦል","Saul","የሕዝቅያስ","Hezekiah","የኢዮስያስ","Josiah"],
+["x33","ot","Song|1:1","","ማሕልየ መሓልይ የማን መዝሙር ተብሎ ይጠራል?","The Song of Songs is called whose song?","የሰሎሞን","Solomon's","የዳዊት","David's","የሙሴ","Moses'","የአሳፍ","Asaph's"],
+["x34","ot","Song|8:7","","ማሕልየ መሓልይ ብዙ ውኆች ምንን ሊያጠፉ አይችሉም ይላል?","The Song of Songs says many waters cannot put out what?","ፍቅርን","Love","እሳትን","Fire","ብርሃንን","Light","ተስፋን","Hope"],
+["x35","ot","Isa|7:14","","ኢሳይያስ ድንግል ፀንሳ የምትወልደው ልጅ ስሙ ማን ይባላል አለ?","Isaiah foretold that a virgin would bear a son. What would he be called?","አማኑኤል","Immanuel","ዳዊት","David","ሰሎሞን","Solomon","ኢያሱ","Joshua","አማኑኤል ማለት «እግዚአብሔር ከእኛ ጋር» ማለት ነው።","Immanuel means “God with us.”"],
+["x36","ot","Isa|6:3","","በኢሳይያስ ራእይ ሱራፌል ምን እያሉ ይጮኹ ነበር?","In Isaiah's vision, what were the seraphim calling out?","ቅዱስ፣ ቅዱስ፣ ቅዱስ","Holy, holy, holy","ሆሣዕና","Hosanna","አሜን፣ አሜን","Amen, amen","ሃሌ ሉያ","Hallelujah","ይህ ምስጋና በቅዳሴ ዘወትር ይባላል።","We say this praise in every Liturgy (Qidase)."],
+["x37","ot","Lam|1:1","","ሰቈቃወ ኤርምያስ የየትኛዋን ከተማ መፍረስ ያለቅሳል?","Lamentations mourns the fall of which city?","ኢየሩሳሌም","Jerusalem","ነነዌ","Nineveh","ባቢሎን","Babylon","ኢያሪኮ","Jericho"],
+["x38","ot","Lam|3:22–23","","ሰቈቃወ ኤርምያስ የእግዚአብሔር ምሕረት መቼ አዲስ ነው ይላል?","Lamentations says the Lord's mercies are new when?","በየማለዳው","Every morning","በየዓመቱ","Every year","በሰንበት ብቻ","Only on the Sabbath","በበዓል ቀን","On feast days"],
+["x39","ot","Ezek|37:1–10","","በሕዝቅኤል ራእይ በሸለቆው ውስጥ ሕያው የሆኑት ምንድን ናቸው?","In Ezekiel's vision, what came back to life in the valley?","ደረቅ አጥንቶች","Dry bones","ዛፎች","Trees","ወንዝ","A river","ከዋክብት","Stars"],
+["x40","ot","Ezek|1:10","","በሕዝቅኤል ራእይ አራቱ እንስሳት የሰው፣ የአንበሳ፣ የላምና የምን ፊት ነበራቸው?","In Ezekiel's vision, the four living creatures had faces of a man, a lion, an ox and what?","የንስር","An eagle","የርግብ","A dove","የፈረስ","A horse","የተኩላ","A wolf","አራቱ እንስሳ በቤተ ክርስቲያናችን ሥዕሎች ይታያሉ።","The four living creatures appear in our church paintings."],
+["x41","ot","Dan|3:19–20","","የዳንኤልን ሦስት ባልንጀሮች ወደ እቶን እሳት የጣላቸው ንጉሥ ማን ነው?","Which king threw Daniel's three friends into the fiery furnace?","ናቡከደነፆር","Nebuchadnezzar","ዳርዮስ","Darius","ቂሮስ","Cyrus","ፈርዖን","Pharaoh"],
+["x42","ot","Hos|1:3","","የነቢዩ ሆሴዕ ሚስት ማን ትባላለች?","What was the name of the prophet Hosea's wife?","ጎሜር","Gomer","ሐና","Hannah","ዲቦራ","Deborah","ሩት","Ruth"],
+["x43","ot","Hos|11:1","","ሆሴዕ «ልጄን ከ… ጠራሁት» አለ። ማቴዎስም ይህን ስለ ኢየሱስ ጠቀሰው።","Hosea wrote, “Out of … I called my son,” words Matthew links to Jesus.","ግብፅ","Egypt","ባቢሎን","Babylon","ናዝሬት","Nazareth","ሶርያ","Syria"],
+["x44","ot","Amos|7:14","","አሞጽ ነቢይ ከመሆኑ በፊት ሥራው ምን ነበር?","What was Amos's work before he became a prophet?","እረኛና የሾላ ፍሬ ለቃሚ","A shepherd who tended fig trees","ካህን","A priest","ንጉሥ","A king","ዓሣ አጥማጅ","A fisherman"],
+["x45","ot","Amos|5:24","","አሞጽ «ፍርድ እንደ … ይፍሰስ» አለ።","Amos said, “Let justice roll down like …”","ውኃ","Waters","እሳት","Fire","ነፋስ","Wind","ድንጋይ","Stones"],
+["x46","ot","Mic|5:2","","ሚክያስ ገዢ እንደሚወጣባት የተናገረላት ትንሿ ከተማ የትኛዋ ናት?","Micah foretold that a ruler would come from which small town?","ቤተ ልሔም","Bethlehem","ናዝሬት","Nazareth","ቅፍርናሆም","Capernaum","ኢያሪኮ","Jericho"],
+["x47","ot","Mic|6:8","","ሚክያስ እግዚአብሔር የሚፈልገው ፍርድን ማድረግ፣ ምሕረትን መውደድና ምን እንደሆነ ተናገረ?","Micah says the Lord asks us to do justice, love mercy and what else?","ከአምላክህ ጋር በትሕትና መሄድ","Walk humbly with your God","ብዙ መሥዋዕት ማቅረብ","Offer many sacrifices","ትልቅ ቤት መሥራት","Build a great house","ዘወትር ብቻ መጾም","Only fast every day"],
+["x48","ot","Acts|2:16–17","Joel","በበዓለ ሃምሳ ጴጥሮስ የመንፈስ ቅዱስ መውረድ በየትኛው ነቢይ እንደተነገረ ተናገረ?","On Pentecost, Peter said the coming of the Holy Spirit was foretold by which prophet?","ኢዮኤል","Joel","ዮናስ","Jonah","ሚልክያስ","Malachi","አሞጽ","Amos","ኢዮኤል 2፥28","Joel 2:28"],
+["x49","ot","Joel|1:4","","ነቢዩ ኢዮኤል ምድሪቱን ያጠፋውን ምን ይገልጻል?","Joel describes the land being stripped bare by what?","አንበጣ","Locusts","ጎርፍ","A flood","እሳት","Fire","የመሬት መንቀጥቀጥ","An earthquake"],
+["x50","ot","Obad|1:1","","አንድ ምዕራፍ ብቻ ያለው በብሉይ ኪዳን አጭሩ መጽሐፍ የትኛው ነው?","Which is the shortest book of the Old Testament, with just one chapter?","ትንቢተ አብድዩ","Obadiah","ትንቢተ ዮናስ","Jonah","መጽሐፈ ሩት","Ruth","ትንቢተ ሐጌ","Haggai"],
+["x51","ot","Obad|1:1","","ነቢዩ አብድዩ የተነበየው በየትኛው ሕዝብ ላይ ነው?","Obadiah prophesied against which nation?","ኤዶምያስ","Edom","ግብፅ","Egypt","ሞዓብ","Moab","አሦር","Assyria"],
+["x52","ot","Jonah|1:2","","እግዚአብሔር ዮናስን የላከው ወደ የትኛው ከተማ ነው?","God sent Jonah to which city?","ነነዌ","Nineveh","ተርሴስ","Tarshish","ባቢሎን","Babylon","ኢየሩሳሌም","Jerusalem"],
+["x53","ot","Nah|1:1","","ናሆም የተነበየው ስለ የትኛው ከተማ መውደቅ ነው?","Nahum prophesied the fall of which city?","ነነዌ","Nineveh","ኢየሩሳሌም","Jerusalem","ባቢሎን","Babylon","ጢሮስ","Tyre"],
+["x54","ot","Nah|1:7","","ናሆም «እግዚአብሔር ቸር ነው፥ በመከራ ቀን …» ይላል።","Nahum says, “The Lord is good, a … in the day of trouble.”","መሸሸጊያ","Refuge","እንግዳ","Stranger","ዝምተኛ","Silent one","ሩቅ","Far away"],
+["x55","ot","Hab|2:4","","ዕንባቆም «ጻድቅ በ… በሕይወት ይኖራል» አለ። ጳውሎስም ይህን ጠቀሰው።","Habakkuk said, “The righteous shall live by his …”, words Paul later quoted.","እምነቱ","Faith","ሀብቱ","Wealth","ኃይሉ","Strength","ጥበቡ","Cleverness"],
+["x56","ot","Hab|3:17–18","","ዕንባቆም በለስ ባያፈራ እንኳ ምን አደርጋለሁ አለ?","Habakkuk said that even if the fig tree does not blossom, he will still do what?","በእግዚአብሔር ደስ ይለኛል","Rejoice in the Lord","አገሩን እለቃለሁ","Leave the land","አጉረመርማለሁ","Complain","ዝም እላለሁ","Stay silent"],
+["x57","ot","Zeph|1:1","","ሶፎንያስ ትንቢት የተናገረው በየትኛው ንጉሥ ዘመን ነው?","Zephaniah prophesied in the days of which king?","ኢዮስያስ","Josiah","ሰሎሞን","Solomon","ሳኦል","Saul","ሄሮድስ","Herod"],
+["x58","ot","Zeph|3:17","","ሶፎንያስ እግዚአብሔር በሕዝቡ ደስ የሚለው በምን ነው ይላል?","Zephaniah says the Lord will rejoice over his people with what?","በዝማሬ","Singing","በቁጣ","Anger","በዝምታ","Silence","በነጎድጓድ","Thunder"],
+["x59","ot","Hag|1:8","","ነቢዩ ሐጌ ሕዝቡ ምን እንዲሠሩ አሳሰበ?","What did the prophet Haggai urge the people to build?","የእግዚአብሔርን ቤት","The house of the Lord","የከተማውን ቅጥር","The city wall","የንጉሥ ቤተ መንግሥት","A palace for the king","መርከብ","A ship"],
+["x60","ot","Hag|1:1","","ሐጌ ትንቢቱን የተናገረው ለየትኛው የይሁዳ ገዢ ነው?","Haggai spoke his message to which governor of Judah?","ዘሩባቤል","Zerubbabel","ጌዴዎን","Gideon","ሳኦል","Saul","ዳንኤል","Daniel"],
+["x61","ot","Zech|9:9","","ዘካርያስ ንጉሥሽ በምን ላይ ተቀምጦ ይመጣል አለ?","Zechariah said the king would come riding on what?","በአህያ","A donkey","በፈረስ","A horse","በሰረገላ","A chariot","በግመል","A camel","በሆሣዕና ተፈጸመ።","This came true on Hosanna (Palm Sunday)."],
+["x62","ot","Zech|11:12","","ዘካርያስ የጠቀሰው፣ በኋላ ከይሁዳ ጋር የተያያዘው ዋጋ ስንት ነው?","Zechariah mentions a price later linked to Judas. How much was it?","ሠላሳ ብር","Thirty pieces of silver","አሥር ወርቅ","Ten pieces of gold","መቶ ብር","A hundred pieces of silver","ሰባት ነሐስ","Seven pieces of bronze"],
+["x63","ot","Mal|1:1","","በብሉይ ኪዳን መጻሕፍት ዝርዝር የመጨረሻው መጽሐፍ የትኛው ነው?","Which book comes last in the list of Old Testament books?","ትንቢተ ሚልክያስ","Malachi","ትንቢተ ዘካርያስ","Zechariah","ትንቢተ ሐጌ","Haggai","ትንቢተ ዳንኤል","Daniel"],
+["x64","ot","Mal|3:1","","ሚልክያስ መንገድ ጠራጊ መልእክተኛ እንደሚላክ ተናገረ። ይህ በማን ተፈጸመ?","Malachi foretold a messenger who would prepare the way. Who fulfilled it?","ዮሐንስ መጥምቅ","John the Baptist","ጴጥሮስ","Peter","ጳውሎስ","Paul","ቶማስ","Thomas","ማርቆስ 1፥2","Mark 1:2"],
+["x65","ot","Exod|14:21–22","","እስራኤላውያን ከግብፅ ሲወጡ በየብስ የተሻገሩት የትኛውን ባሕር ነው?","Leaving Egypt, the Israelites crossed which sea on dry ground?","ቀይ ባሕር","The Red Sea","ሙት ባሕር","The Dead Sea","የገሊላ ባሕር","The Sea of Galilee","ታላቁ ባሕር","The Great Sea"],
+["x66","ot","Num|13:30","","ከአሥራ ሁለቱ ሰላዮች መካከል ከኢያሱ ጋር ምድሪቱን እንውረሳት ያለው ማን ነው?","Of the twelve spies, who stood with Joshua and said, “Let us go up and take the land”?","ካሌብ","Caleb","አሮን","Aaron","ቆሬ","Korah","በለዓም","Balaam"],
+["x67","ot","Isa|53:7","","ኢሳይያስ 53 ስለ መሲሕ «እንደ … ወደ መታረድ ተነዳ» ይላል።","Isaiah 53 says he was led like a … to the slaughter.","በግ","Lamb","አንበሳ","Lion","ወይፈን","Ox","ርግብ","Dove","ጃንደረባው ያነብ የነበረው ይህን ክፍል ነው።","This is the passage the Ethiopian official was reading."],
+["x68","ot","Jer|1:5","","እግዚአብሔር ኤርምያስን «በሆድ ሳልሠራህ … » አለው። ምን?","God told Jeremiah, “Before I formed you in the womb, I …”","አውቅሃለሁ","Knew you","ረሳሁህ","Forgot you","ፈራሁህ","Feared you","ተውሁህ","Left you"],
+/* ---------- Deuterocanonical books (የቀኖና መጻሕፍት) ---------- */
+["d1","dc","Sut|4:1","","በዕዝራ ሱቱኤል የዕዝራን ጥያቄዎች የሚመልስለት መልአክ ማን ነው?","In Ezra Sutuel, which angel answers Ezra's questions?","ዑራኤል","Uriel","ገብርኤል","Gabriel","ሚካኤል","Michael","ሩፋኤል","Raphael"],
+["d2","dc","Sut|14:23–44","","በዕዝራ ሱቱኤል መጻሕፍቱ እንደገና በስንት ቀን ተጻፉ?","In Ezra Sutuel, in how many days were the books written down again?","በ40 ቀን","40 days","በ7 ቀን","7 days","በ3 ቀን","3 days","በ12 ቀን","12 days"],
+["d3","dc","2Ezr|3–4","","በንጉሡ ዳርዮስ ፊት በተደረገው ክርክር ከሁሉ የሚበረታው ምንድን ነው ተባለ?","In the contest before King Darius, what was found to be strongest of all?","እውነት","Truth","የወይን ጠጅ","Wine","ንጉሡ","The king","ወርቅ","Gold"],
+["d4","dc","2Ezr|4:13","","በዚያ ክርክር ያሸነፈው ወጣት ማን ነበር?","Which young man won that contest?","ዘሩባቤል","Zerubbabel","ዕዝራ","Ezra","ነሐምያ","Nehemiah","ዳንኤል","Daniel"],
+["d5","dc","Tob|5","","ጦብያን በጉዞው የመራው መልአክ ማን ነው?","Which angel guided Tobias on his journey?","ሩፋኤል","Raphael","ገብርኤል","Gabriel","ሚካኤል","Michael","ዑራኤል","Uriel"],
+["d6","dc","Tob|11","","የጦቢትን ዓይን ያበራው ምንድን ነው?","What healed Tobit's blindness?","የዓሣ ሐሞት","The gall of a fish","ዘይት","Oil","የዮርዳኖስ ውኃ","Water from the Jordan","ጭቃ","Clay"],
+["d7","dc","Jdt|13","","ዮዲት ያሸነፈችው የጠላት ጦር አለቃ ማን ነው?","Which enemy general did Judith defeat?","ሆሎፎርኔስ","Holofernes","ጎልያድ","Goliath","ሐማ","Haman","ሲሣራ","Sisera"],
+["d8","dc","Jdt|8","","ዮዲት ሕዝቡን ከማዳኗ በፊት ሕዝቡን ምን አሳሰበች?","Before saving her people, what did Judith urge them to do?","በእግዚአብሔር እንዲታመኑ","Trust in God","ከተማውን እንዲለቁ","Leave the city","ለጠላት እጅ እንዲሰጡ","Surrender to the enemy","ዝም እንዲሉ","Keep quiet"],
+["d9","dc","EsthD|","","የቀኖናው አስቴር የየትኞቹን የሁለት ሰዎች ጸሎት ይጨምራል?","The added parts of Esther include the prayers of which two people?","መርዶክዮስና አስቴር","Mordecai and Esther","ሐማና ንጉሡ","Haman and the king","ዕዝራና ነሐምያ","Ezra and Nehemiah","ሩትና ኑኃሚን","Ruth and Naomi"],
+["d10","dc","EsthD|","","የቀኖናው አስቴር የሚጀምረው በማን ሕልም ነው?","The added parts of Esther begin with whose dream?","የመርዶክዮስ","Mordecai's","የሐማ","Haman's","የንጉሡ","The king's","የአስቴር","Esther's"],
+["d11","dc","1 Meq|","","በ1 መቃብያን ለጣዖት አንሰግድም ያሉት የመቃቢስ ልጆች ስንት ነበሩ?","In 1 Meqabyan, how many sons of Meqabis refused to bow to idols?","ሦስት","Three","ሰባት","Seven","ሁለት","Two","አሥራ ሁለት","Twelve"],
+["d12","dc","1 Meq|","","የኢትዮጵያ ቀኖና መቃብያን ከሌሎች መጽሐፍ ቅዱሶች «መቃብያን» ጋር እንዴት ይነጻጸራሉ?","How do the Ethiopian books of Meqabyan compare with the “Maccabees” in other Bibles?","የተለያዩ መጻሕፍት ናቸው","They are different books","አንድ ዓይነት ናቸው","They are exactly the same","ትርጉም ብቻ ናቸው","One is a translation of the other","መቃብያን የሉም","Meqabyan doesn't exist"],
+["d13","dc","2 Meq|","","2 መቃብያን በተለይ ስለ ምን ተስፋ ያስተምራል?","2 Meqabyan teaches especially about what hope?","የሙታን ትንሣኤ","The resurrection of the dead","የምድር ሀብት","Earthly riches","የጦርነት ድል","Victory in war","ረጅም ዕድሜ","A long life"],
+["d14","dc","2 Meq|","","በ2 መቃብያን የተጠቀሰው መቃቢስ ከየትኛው አገር ነበር?","The Meqabis of 2 Meqabyan came from which land?","ሞዓብ","Moab","ግብፅ","Egypt","ፋርስ","Persia","ሮም","Rome"],
+["d15","dc","3 Meq|","","3 መቃብያን በዋናነት ሰዎችን ወደ ምን ይጠራል?","3 Meqabyan is mainly a call to what?","ንስሐ ገብቶ የእግዚአብሔርን ሕግ መጠበቅ","Repent and keep God's law","ጦርነት","Go to war","ሀብት መሰብሰብ","Gather wealth","ከተማ መሥራት","Build cities"],
+["d16","dc","3 Meq|","","በኢትዮጵያ ቀኖና ስንት የመቃብያን መጻሕፍት አሉ?","How many books of Meqabyan are in the Ethiopian canon?","ሦስት","Three","አንድ","One","አራት","Four","ሁለት","Two"],
+["d17","dc","Sir|","","መጽሐፈ ሲራክን የጻፈው ማን ነው?","Who wrote the book of Sirach?","ኢያሱ ወልደ ሲራክ","Jesus son of Sirach","ሰሎሞን","Solomon","ዕዝራ","Ezra","ባሮክ","Baruch"],
+["d18","dc","Sir|6:14","","ሲራክ ታማኝ ወዳጅ ያገኘ ሰው ምን አገኘ ይላል?","Sirach says whoever finds a faithful friend has found what?","መዝገብ (ትልቅ ሀብት)","A treasure","ጠላት","An enemy","መንግሥት","A kingdom","ሸክም","A burden"],
+["d19","dc","Man|","","ጸሎተ ምናሴ ምን ዓይነት ጸሎት ነው?","What kind of prayer is the Prayer of Manasseh?","የንስሐ ጸሎት","A prayer of repentance","የድል ምስጋና","Thanks for a victory","የሠርግ ምርቃት","A wedding blessing","የመከር ጸሎት","A harvest prayer"],
+["d20","dc","2 Chr|33:12–13","Man","ምናሴ የየትኛው መንግሥት ንጉሥ ነበር?","Manasseh was king of which kingdom?","ይሁዳ","Judah","ፋርስ","Persia","ግብፅ","Egypt","ባቢሎን","Babylon"],
+["d21","dc","RJer|","","በተረፈ ኤርሚያስ አቤሜሌክ ስንት ዓመት ተኛ?","In the Rest of Jeremiah, how many years did Abimelech sleep?","66 ዓመት","66 years","7 ዓመት","7 years","40 ዓመት","40 years","100 ዓመት","100 years","ይህ ኤርምያስን ከጉድጓድ ያወጣው ኢትዮጵያዊው አቤሜሌክ ነው።","This is Abimelech (Ebed-Melech), the Ethiopian who saved Jeremiah."],
+["d22","dc","RJer|","","አቤሜሌክ ሲነቃ ገና ትኩስ ሆኖ ያገኘው ምንድን ነው?","When Abimelech woke up, what did he find still fresh?","በለስ","Figs","እንጀራ","Bread","ውኃ","Water","አበባ","Flowers"],
+["d23","dc","Sus|","","ሶስና ንጹሕ መሆኗን ያረጋገጠው ማን ነው?","Who proved Susanna innocent?","ዳንኤል","Daniel","ዮሴፍ","Joseph","ሳሙኤል","Samuel","ኤልያስ","Elijah"],
+["d24","dc","Sus|","","ዳንኤል ሁለቱን ሽማግሌዎች ለየብቻ ምን ብሎ ጠየቃቸው?","Daniel questioned the two elders separately. What did he ask each one?","በየትኛው ዛፍ ሥር እንዳዩአት","Under which tree they saw her","በየትኛው ቀን","Which day it was","ልብሷ ምን ዓይነት እንደሆነ","What color her clothes were","ስንት ሰዓት እንደሆነ","What time it was"],
+["d25","dc","Bar|1:1","","ባሮክ የየትኛው ነቢይ ጸሐፊ ነበር?","Baruch was the scribe of which prophet?","ኤርምያስ","Jeremiah","ኢሳይያስ","Isaiah","ዳንኤል","Daniel","ሕዝቅኤል","Ezekiel"],
+["d26","dc","Bar|1:1–4","","የባሮክ መጽሐፍ ለስደተኞቹ የተነበበው በየትኛው ከተማ ነው?","The book of Baruch was read to the exiles in which city?","ባቢሎን","Babylon","ኢየሩሳሌም","Jerusalem","ነነዌ","Nineveh","ግብፅ","Egypt"],
+["d27","dc","Wis|","","መጽሐፈ ጥበብ በትውፊት ከየትኛው ንጉሥ ጋር ይያያዛል?","The book of Wisdom is traditionally linked with which king?","ሰሎሞን","Solomon","ዳዊት","David","ሕዝቅያስ","Hezekiah","ኢዮስያስ","Josiah"],
+["d28","dc","Wis|3:1","","መጽሐፈ ጥበብ የጻድቃን ነፍሳት በምን ውስጥ ናቸው ይላል?","The book of Wisdom says the souls of the righteous are where?","በእግዚአብሔር እጅ","In the hand of God","በባሕር","In the sea","በምድር","In the earth","በከዋክብት","Among the stars"],
+["d29","dc","Three|","","ሠለስቱ ደቂቅ ይህን መዝሙር የዘመሩት የት ሆነው ነው?","Where were the three youths when they sang this song?","በእቶን እሳት ውስጥ","Inside the fiery furnace","በአንበሶች ጉድጓድ","In the lions' den","በመርከብ","On a ship","በቤተ መቅደስ","In the temple","ይህ መዝሙር በቤተ ክርስቲያናችን ጸሎት ይባላል።","This song is prayed in our church."],
+["d30","dc","Three|","","በመዝሙሩ ሠለስቱ ደቂቅ ፍጥረታትን ሁሉ ምን እንዲያደርጉ ጠሩ?","In their song, what did the three youths call all creation to do?","እግዚአብሔርን እንዲያመሰግኑ","Bless and praise the Lord","እንዲሸሹ","Run away","ዝም እንዲሉ","Be silent","እንዲተኙ","Go to sleep"],
+["d31","dc","RDan|","","ዳንኤል ለቤል የቀረበውን ምግብ የሚበሉት በእውነት እነማን እንደሆኑ ለንጉሡ አሳየ?","Daniel showed the king who was really eating the food set before the idol Bel. Who?","ካህናቱና ቤተሰቦቻቸው","The priests and their families","ጣዖቱ ራሱ","The idol itself","አንበሶች","Lions","ወፎች","Birds"],
+["d32","dc","RDan|","","ዳንኤል በአንበሶች ጉድጓድ ሳለ መልአኩ ምግብ እንዲያመጣለት የወሰደው ነቢይ ማን ነው?","When Daniel was in the lions' den, which prophet did an angel carry to bring him food?","ዕንባቆም","Habakkuk","ዮናስ","Jonah","ኤልያስ","Elijah","ኤርምያስ","Jeremiah"],
+["d33","dc","Jub|","","በመጽሐፈ ኩፋሌ ታሪኩ በሲና ተራራ የተነገረው ለማን ነው?","In Jubilees, to whom is the history told on Mount Sinai?","ሙሴ","Moses","አብርሃም","Abraham","ሔኖክ","Enoch","ዕዝራ","Ezra"],
+["d34","dc","Jub|","","ኩፋሌ ዘመናትን የሚቆጥረው በስንት ስንት ዓመት ነው?","Jubilees counts history in periods of how many years?","49 ዓመት","49 years","10 ዓመት","10 years","100 ዓመት","100 years","12 ዓመት","12 years","ኢዮቤልዩ ሰባት ጊዜ ሰባት ዓመት ነው።","A jubilee is seven times seven years."],
+["d35","dc","Gen|5:21","Enoch","ሔኖክ የየትኛው ረጅም ዕድሜ የኖረ ሰው አባት ነው?","Enoch was the father of which very long-lived man?","ማቱሳላ","Methuselah","ኖኅ","Noah","ላሜሕ","Lamech","ያሬድ","Jared"],
+["d36","dc","Jude|14–15","Enoch","ከመጽሐፈ ሔኖክ የጠቀሰው የሐዲስ ኪዳን መልእክት የትኛው ነው?","Which New Testament letter quotes the book of Enoch?","የይሁዳ መልእክት","Jude","ወደ ሮሜ ሰዎች","Romans","ወደ ዕብራውያን","Hebrews","1ኛ የጴጥሮስ መልእክት","1 Peter"],
+/* ---------- New Testament ---------- */
+["y1","nt","Mark|10:14","","ኢየሱስ «… ወደ እኔ ይምጡ፤ አትከልክሉአቸው» አለ። እነማን?","Jesus said, “Let the … come to me; do not stop them.” Who?","ሕፃናት","The little children","ባለ ጠጎች","The rich","ካህናት","The priests","ወታደሮች","The soldiers"],
+["y2","nt","Acts|1:26","","በይሁዳ ፋንታ የተመረጠው ሐዋርያ ማን ነው?","Which disciple was chosen to take Judas's place?","ማትያስ","Matthias","ጳውሎስ","Paul","በርናባስ","Barnabas","እስጢፋኖስ","Stephen"],
+["y3","nt","Rom|6:23","","ሮሜ 6፥23 «የእግዚአብሔር ስጦታ … ነው» ይላል።","Romans 6:23 says the gift of God is what?","የዘላለም ሕይወት","Eternal life","ብዙ ሀብት","Great riches","ረጅም ዕድሜ","A long life","ክብር","Honor"],
+["y4","nt","Rom|12:21","","ጳውሎስ ክፉውን በምን አሸንፍ ይላል?","Paul says to overcome evil with what?","በመልካም","Good","በቁጣ","Anger","በዝምታ","Silence","በኃይል","Force"],
+["y5","nt","1 Cor|13:13","","እምነት፣ ተስፋ፣ ፍቅር፤ ከእነዚህ የሚበልጠው የትኛው ነው?","Faith, hope and love: which is the greatest?","ፍቅር","Love","እምነት","Faith","ተስፋ","Hope","ሦስቱም እኩል","All three are equal"],
+["y6","nt","1 Cor|12:12–27","","ጳውሎስ ቤተ ክርስቲያንን ብዙ ብልቶች ካሉት ከምን ጋር አመሳሰላት?","Paul compares the church, with its many members, to what?","ከአካል","A body","ከቤት","A house","ከመርከብ","A ship","ከዛፍ","A tree"],
+["y7","nt","2 Cor|9:7","","እግዚአብሔር የሚወደው እንዴት የሚሰጠውን ሰው ነው?","God loves a giver who gives how?","በደስታ የሚሰጠውን","Cheerfully","በግድ የሚሰጠውን","Because he must","በብዛት ብቻ","Only in large amounts","በሚስጥር ብቻ","Only in secret"],
+["y8","nt","2 Cor|12:9","","እግዚአብሔር ለጳውሎስ «ኃይሌ በ… ይፈጸማል» አለው።","God told Paul, “My power is made perfect in …”","ድካም","Weakness","ሀብት","Wealth","ጥንካሬ","Strength","ጥበብ","Wisdom"],
+["y9","nt","Gal|5:22","","የመንፈስ ፍሬ በምን ይጀምራል?","The fruit of the Spirit begins with what?","ፍቅር፣ ደስታ፣ ሰላም","Love, joy, peace","ኃይል፣ ሀብት፣ ክብር","Power, riches, honor","ጾም፣ ስግደት፣ ምጽዋት","Fasting, bowing, giving","ጥበብ፣ እውቀት፣ ማስተዋል","Wisdom, knowledge, insight"],
+["y10","nt","Gal|6:2","","ጳውሎስ «አንዱ የአንዱን … ተሸከሙ» ይላል።","Paul says, “Carry one another's …”","ሸክም","Burdens","ስም","Names","ልብስ","Coats","ደብዳቤ","Letters"],
+["y11","nt","Eph|6:17","","በእግዚአብሔር የጦር ዕቃ ውስጥ የመንፈስ ሰይፍ ምንድን ነው?","In the armor of God, what is the sword of the Spirit?","የእግዚአብሔር ቃል","The word of God","እምነት","Faith","እውነት","Truth","መዳን","Salvation","እምነት ጋሻ፣ እውነት መታጠቂያ፣ መዳን ራስ ቍር ናቸው።","Faith is the shield, truth the belt, salvation the helmet."],
+["y12","nt","Eph|6:1","","ኤፌሶን 6፥1 ልጆችን ምን እንዲያደርጉ ያዝዛል?","Ephesians 6:1 tells children to do what?","ለወላጆቻቸው እንዲታዘዙ","Obey their parents","ብዙ እንዲጫወቱ","Play a lot","ዝም እንዲሉ","Stay quiet","ቤት እንዳይወጡ","Never leave home"],
+["y13","nt","Phil|4:13","","«በሚያስችለኝ በ… ሁሉን እችላለሁ» የሚለው ጥቅስ የጎደለው ቃል የትኛው ነው?","“I can do all things through … who strengthens me.” Which word is missing?","ክርስቶስ","Christ","ራሴ","Myself","ወዳጆቼ","My friends","ሀብቴ","My wealth"],
+["y14","nt","Phil|4:4","","ጳውሎስ «በጌታ ሁልጊዜ …» አለ።","Paul wrote, “… in the Lord always.”","ደስ ይበላችሁ","Rejoice","አልቅሱ","Weep","ተኙ","Sleep","ተደበቁ","Hide"],
+["y15","nt","Col|4:14","","ቆላስይስ ሉቃስን «የተወደደው …» ይለዋል።","Colossians calls Luke “the beloved …”","ባለ መድኃኒት","Physician","ዓሣ አጥማጅ","Fisherman","ቀራጭ","Tax collector","ድንኳን ሰፊ","Tentmaker"],
+["y16","nt","Col|3:20","","ቆላስይስ 3፥20 ልጆች በምን ነገር ለወላጆቻቸው ይታዘዙ ይላል?","Colossians 3:20 says children should obey their parents in what?","በሁሉ ነገር","In everything","በትንሽ ነገር ብቻ","Only small things","በበዓል ቀን ብቻ","Only on feast days","ሲፈልጉ ብቻ","Only when they want"],
+["y17","nt","1 Thess|5:17","","1 ተሰሎንቄ 5፥17 «ሳታቋርጡ …» ይላል።","1 Thessalonians 5:17 says, “… without ceasing.”","ጸልዩ","Pray","ብሉ","Eat","ተጓዙ","Travel","ሥሩ","Work"],
+["y18","nt","1 Thess|4:16","","ጌታ ከሰማይ በምን ድምፅ ይወርዳል?","The Lord will come down from heaven with the sound of what?","የእግዚአብሔር መለከት","God's trumpet","ከበሮ","Drums","ደወል","Bells","በገና","A harp"],
+["y19","nt","2 Thess|3:10","","2 ተሰሎንቄ «ሊሠራ የማይወድ ቢኖር …» ይላል።","2 Thessalonians says, “If anyone will not work, …”","አይብላ","Let him not eat","ይተኛ","Let him sleep","ይዘምር","Let him sing","ይጓዝ","Let him travel"],
+["y20","nt","2 Thess|3:13","","ጳውሎስ በምን አትታክቱ ይላል?","Paul says not to grow tired of doing what?","መልካም በማድረግ","Doing good","በመተኛት","Sleeping","በመናገር","Talking","በመጓዝ","Traveling"],
+["y21","nt","1 Tim|4:12","","ጳውሎስ ጢሞቴዎስን «ማንም … አይናቅ» አለው።","Paul told Timothy, “Let no one look down on your …”","ታናሽነትህን","Youth","ሀብትህን","Wealth","ቤትህን","House","ስምህን","Name"],
+["y22","nt","1 Tim|6:10","","1 ጢሞቴዎስ «የክፋት ሁሉ ሥር» ምን ነው ይላል?","1 Timothy says the root of all kinds of evil is what?","የገንዘብ ፍቅር","The love of money","ድህነት","Poverty","ሥራ","Work","መዝሙር","Singing"],
+["y23","nt","2 Tim|1:5","","ጢሞቴዎስ እምነትን የተማረው ከአያቱ ከሎይድና ከእናቱ ከማን ነው?","Timothy learned faith from his grandmother Lois and his mother. What was her name?","ኤውንቄ","Eunice","ማርያም","Mary","ማርታ","Martha","ልድያ","Lydia"],
+["y24","nt","2 Tim|4:7","","ጳውሎስ «መልካሙን ገድል ተጋደልሁ፣ ሩጫውን ጨረስሁ፣ …» አለ።","Paul said, “I have fought the good fight, I have finished the race, I have …”","ሃይማኖትን ጠበቅሁ","Kept the faith","ሀብት ሰበሰብሁ","Gathered riches","ቤት ሠራሁ","Built a house","ሁሉን ረሳሁ","Forgotten everything"],
+["y25","nt","Titus|1:5","","ጳውሎስ ቲቶን የተወው በየትኛው ደሴት ነው?","On which island did Paul leave Titus?","ቀርጤስ","Crete","ቆጵሮስ","Cyprus","መላጥያ","Malta","ፍጥሞ","Patmos"],
+["y26","nt","Titus|1:5","","ቲቶ በየከተማው ምን እንዲሾም ታዘዘ?","Titus was told to appoint whom in every town?","ቀሳውስትን (ሽማግሌዎችን)","Elders","ነገሥታትን","Kings","ወታደሮችን","Soldiers","ቀራጮችን","Tax collectors"],
+["y27","nt","Phlm|10–16","","ጳውሎስ ፊልሞናን በደስታ እንዲቀበለው የለመነለት ማንን ነው?","Paul asked Philemon to welcome back whom?","አናሲሞስ","Onesimus","ጢሞቴዎስ","Timothy","ቲቶ","Titus","ሉቃስ","Luke"],
+["y28","nt","Phlm|1","","መልእክቱ ወደ ፊልሞና ስንት ምዕራፍ አለው?","How many chapters does the letter to Philemon have?","አንድ","One","ሦስት","Three","አምስት","Five","አሥራ ሁለት","Twelve"],
+["y29","nt","Heb|11:1","","ዕብራውያን 11 በምን ይታወቃል?","Hebrews chapter 11 is famous for describing what?","እምነትን","Faith","ጦርነትን","War","የቤተ መቅደስ ሥራን","Building the temple","ጾምን","Fasting"],
+["y30","nt","Heb|13:8","","«ኢየሱስ ክርስቶስ ትናንትና ዛሬ እስከ ለዘላለምም …» ነው።","“Jesus Christ is … yesterday, today and forever.”","ያው","The same","ሩቅ","Far away","ዝም","Silent","አዲስ","New"],
+["y31","nt","1 Pet|5:7","","1 ጴጥሮስ 5፥7 «እርሱ ስለ እናንተ ያስባልና … ሁሉ በእርሱ ላይ ጣሉት» ይላል።","1 Peter 5:7 says to cast all your … on him, because he cares for you.","ጭንቀታችሁን","Worries","ገንዘባችሁን","Money","ልብሳችሁን","Clothes","ቤታችሁን","Houses"],
+["y32","nt","1 Pet|5:8","","1 ጴጥሮስ ዲያብሎስ እንደሚያገሣ ምን ይዞራል ይላል?","1 Peter says the devil prowls around like a roaring what?","አንበሳ","Lion","ተኩላ","Wolf","እባብ","Snake","ድብ","Bear"],
+["y33","nt","2 Pet|1:17–18","","2 ጴጥሮስ ጴጥሮስ በቅዱሱ ተራራ የእግዚአብሔርን ድምፅ የሰማበትን የትኛውን ቀን ያስታውሳል?","In 2 Peter, Peter remembers hearing God's voice on the holy mountain. At which event?","ደብረ ታቦር (መገለጥ)","The Transfiguration (Debre Tabor)","ጥምቀት","The Baptism","ትንሣኤ","The Resurrection","በዓለ ሃምሳ","Pentecost","ቡሄ በዚህ በዓል ይከበራል።","We celebrate Buhe on this feast."],
+["y34","nt","2 Pet|3:8","","2 ጴጥሮስ በጌታ ዘንድ አንድ ቀን እንደ ስንት ዓመት ነው ይላል?","2 Peter says that with the Lord one day is like how many years?","ሺህ ዓመት","A thousand years","መቶ ዓመት","A hundred years","አሥር ዓመት","Ten years","አንድ ዓመት","One year"],
+["y35","nt","1 John|4:8","","1 ዮሐንስ 4፥8 «እግዚአብሔር … ነው» ይላል።","1 John 4:8 says, “God is …”","ፍቅር","Love","ሩቅ","Far away","ቁጣ","Anger","ዝም","Silent"],
+["y36","nt","1 John|1:5","","1 ዮሐንስ እግዚአብሔር ምን ነው፣ በእርሱም ጨለማ የለም ይላል?","1 John says God is what, and in him there is no darkness at all?","ብርሃን","Light","እሳት","Fire","ውኃ","Water","ነፋስ","Wind"],
+["y37","nt","2 John|1","","2ኛ የዮሐንስ መልእክት የተጻፈው ለማን ነው?","To whom is 2 John written?","ለተመረጠችው እመቤትና ለልጆቿ","The chosen lady and her children","ለጋይዮስ","Gaius","ለጢሞቴዎስ","Timothy","በሮሜ ላለች ቤተ ክርስቲያን","The church in Rome"],
+["y38","nt","2 John|6","","2 ዮሐንስ ፍቅር ምን እንደሆነ ይናገራል?","What does 2 John say love is?","በትእዛዙ መመላለስ","Walking in his commandments","ብዙ ስጦታ መስጠት","Giving many gifts","ዝም ማለት","Keeping quiet","መጓዝ","Traveling"],
+["y39","nt","3 John|1","","3ኛ የዮሐንስ መልእክት የተጻፈው ለማን ነው?","To whom is 3 John written?","ለጋይዮስ","Gaius","ለቲቶ","Titus","ለፊልሞና","Philemon","ለልድያ","Lydia"],
+["y40","nt","3 John|4","","ዮሐንስ ከምንም የሚበልጥ ደስታዬ ልጆቼ በምን ሲመላለሱ መስማት ነው አለ?","John said his greatest joy is to hear that his children walk in what?","በእውነት","The truth","በሀብት","Riches","በክብር","Honor","በጸጥታ","Quiet"],
+["y41","nt","Jas|2:26","","ያዕቆብ ሥራ የሌለው እምነት ምን ነው ይላል?","James says faith without works is what?","የሞተ","Dead","ጠንካራ","Strong","የተሰወረ","Hidden","ፍጹም","Perfect"],
+["y42","nt","Jas|1:19","","ያዕቆብ ለመስማት የፈጠናችሁ፣ ለመናገር የዘገያችሁ፣ ለምንም የዘገያችሁ ሁኑ ይላል?","James says be quick to listen, slow to speak and slow to what?","ለቁጣ","Anger","ለሥራ","Work","ለጸሎት","Prayer","ለምሕረት","Mercy"],
+["y43","nt","Jude|1","","ይሁዳ ራሱን የማን ወንድም ብሎ ይጠራል?","Jude calls himself the brother of whom?","ያዕቆብ","James","ጴጥሮስ","Peter","ዮሐንስ","John","እንድርያስ","Andrew"],
+["y44","nt","Jude|9","","ስለ ሙሴ ሥጋ ከዲያብሎስ ጋር የተከራከረው የመላእክት አለቃ ማን ነው?","Which archangel disputed with the devil about the body of Moses?","ሚካኤል","Michael","ገብርኤል","Gabriel","ሩፋኤል","Raphael","ዑራኤል","Uriel"],
+["y45","nt","Rev|1:9","","ዮሐንስ ራእዩን ያየው በየትኛው ደሴት ነበር?","On which island did John see the Revelation?","ፍጥሞ","Patmos","ቀርጤስ","Crete","ቆጵሮስ","Cyprus","መላጥያ","Malta"],
+["y46","nt","Rev|22:13","","በራእይ ጌታ «እኔ አልፋና … ነኝ» ይላል።","In Revelation the Lord says, “I am the Alpha and the …”","ዖሜጋ","Omega","ቤታ","Beta","ጋማ","Gamma","ዴልታ","Delta","የግሪክ ፊደል የመጀመሪያውና የመጨረሻው ናቸው፤ መጀመሪያና መጨረሻ ማለት ነው።","The first and last Greek letters: the beginning and the end."],
+["y47","nt","Matt|5:9","","ኢየሱስ በተራራው ስብከት «… ብፁዓን ናቸው፤ የእግዚአብሔር ልጆች ይባላሉና» አለ።","In the Sermon on the Mount: “Blessed are the …, for they shall be called children of God.”","የሚያስተራርቁ","Peacemakers","ባለ ጠጎች","Rich","ብርቱዎች","Strong","የሚቈጡ","Angry"],
+["y48","nt","John|3:16","","ዮሐንስ 3፥16 እግዚአብሔር ዓለሙን እንዲሁ ወዶ ማንን ሰጠ ይላል?","John 3:16 says God so loved the world that he gave whom?","አንድያ ልጁን","His only Son","መላእክቱን","His angels","ነቢያትን","The prophets","ሕጉን ብቻ","Only the law"]
+];
+for(const r of QROWS){const [id,c,ref,b,qa,qe,...rest]=r;const o=[];for(let i=0;i<8;i+=2)o.push([rest[i],rest[i+1]]);
+ const q={id,c,q:[qa,qe],o,r:ref};if(b)q.b=b;if(rest.length>=10)q.x=[rest[8],rest[9]];QUIZ.push(q)}
+
+/* ---------- more people for “Who am I?” ---------- */
+WHO.push(
+ {id:"job",n:["ኢዮብ","Job"],r:"Job|1–42",k:[["በዖጽ ምድር የኖርኩ ጻድቅ ሰው ነኝ።","I was a good man who lived in the land of Uz."],["ልጆቼንና ሀብቴን በአንድ ቀን አጣሁ።","I lost my children and my riches in one day."],["ሦስት ወዳጆቼ ሊያጽናኑኝ መጡ።","Three friends came to comfort me."],["እግዚአብሔር በመጨረሻ እጥፍ አድርጎ መለሰልኝ።","In the end God gave me back twice as much."]]},
+ {id:"esther",n:["አስቴር","Esther"],r:"Esth|2–8",k:[["ያሳደገኝ የአጎቴ ልጅ ነው።","My cousin raised me."],["የፋርስ ንግሥት ሆንሁ።","I became queen of Persia."],["ሕዝቤን ለማዳን ሳልጠራ ወደ ንጉሡ ገባሁ።","I went to the king without being called, to save my people."],["ሐማ ያዘጋጀው ክፉ ዕቅድ በእኔ ተገለጠ።","Through me, Haman's evil plan was uncovered."]]},
+ {id:"paul",n:["ጳውሎስ","Paul"],r:"Acts|9:1–19",k:[["በመጀመሪያ ስሜ ሳውል ነበር።","My name was Saul at first."],["ድንኳን በመስፋት እሠራ ነበር።","I made tents for a living."],["ብዙ መልእክቶችን ለአብያተ ክርስቲያናት ጻፍሁ።","I wrote many letters to the churches."],["በደማስቆ መንገድ ታላቅ ብርሃን አየሁ።","I saw a great light on the road to Damascus."]]},
+ {id:"enoch",n:["ሔኖክ","Enoch"],r:"Gen|5:18–24",b:"Enoch",k:[["የያሬድ ልጅ ነኝ።","I am the son of Jared."],["ልጄ ማቱሳላ ብዙ ዘመን ኖረ።","My son Methuselah lived for a very long time."],["ከእግዚአብሔር ጋር አካሄድሁ።","I walked with God."],["ሳልሞት እግዚአብሔር ወሰደኝ፤ መጽሐፌም በኢትዮጵያ ቀኖና አለ።","God took me without dying, and my book is in the Ethiopian canon."]]},
+ {id:"judith",n:["ዮዲት","Judith"],r:"Jdt|8–16",k:[["ባሌ የሞተብኝ ጸሎተኛ ሴት ነኝ።","I was a praying widow."],["ከተማዬ በጠላት ጦር ተከብባ ነበር።","My city was surrounded by an enemy army."],["ወደ ጠላት ሰፈር በድፍረት ገባሁ።","I bravely went into the enemy camp."],["የጦር አለቃውን ሆሎፎርኔስን አሸነፍሁ።","I defeated the general Holofernes."]]},
+ {id:"susanna",n:["ሶስና","Susanna"],r:"Sus|",k:[["ጻድቅና እግዚአብሔርን የምፈራ ሴት ነኝ።","I was a good woman who feared God."],["ሁለት ክፉ ሽማግሌዎች በሐሰት ከሰሱኝ።","Two wicked elders accused me falsely."],["ወደ እግዚአብሔር በታላቅ ድምፅ ጮኽሁ።","I cried out to God with a loud voice."],["ወጣቱ ዳንኤል ንጹሕ መሆኔን አረጋገጠ።","Young Daniel proved that I was innocent."]]},
+ {id:"tobias",n:["ጦብያ","Tobias"],r:"Tob|5–11",k:[["አባቴ ዓይኑ የታወረ ደግ ሰው ነበር።","My father was a kind man who became blind."],["ገንዘብ ለማምጣት ረጅም መንገድ ተጓዝሁ።","I made a long journey to collect money."],["መልአኩ ሩፋኤል መንገድ መራኝ።","The angel Raphael guided me on the way."],["በዓሣ ሐሞት የአባቴን ዓይን አበራሁ።","I healed my father's eyes with a fish's gall."]]},
+ {id:"nehemiah",n:["ነሐምያ","Nehemiah"],r:"Neh|1–6",k:[["የፋርስ ንጉሥ ጠጅ አሳላፊ ነበርሁ።","I was cupbearer to the king of Persia."],["የኢየሩሳሌም ቅጥር መፍረሱን ሰምቼ አለቀስሁ።","I wept when I heard Jerusalem's wall was broken down."],["ንጉሡ እንድሄድ ፈቀደልኝ።","The king allowed me to go."],["ቅጥሩ በ52 ቀን ተሠራ።","The wall was rebuilt in 52 days."]]}
+);
+
+/* ---------- more stories to put in order ---------- */
+STORY.push(
+ {id:"tobias",t:["የጦብያ ጉዞ","Tobias's journey"],r:"Tob|5–11",b:"Tob",s:[["ጦቢት ዓይኑ ታወረ","Tobit becomes blind"],["ጦብያ ከመልአኩ ሩፋኤል ጋር መንገድ ጀመረ","Tobias sets out with the angel Raphael"],["በወንዙ ዓሣ ያዘ","He catches a fish in the river"],["ሣራን አገባ","He marries Sarah"],["ወደ ቤት ተመልሶ የአባቱን ዓይን አበራ","He comes home and heals his father's eyes"]]},
+ {id:"susanna",t:["ሶስናና ዳንኤል","Susanna and Daniel"],r:"Sus|",s:[["ሁለት ሽማግሌዎች ሶስናን በሐሰት ከሰሱ","Two elders accuse Susanna falsely"],["ሞት ተፈረደባት","She is sentenced to death"],["ወደ እግዚአብሔር ጮኸች","She cries out to God"],["ዳንኤል ሽማግሌዎቹን ለየብቻ ጠየቃቸው","Daniel questions the elders separately"],["ውሸታቸው ተገልጦ ሶስና ዳነች","Their lie is exposed and Susanna is saved"]]},
+ {id:"furnace",t:["ሠለስቱ ደቂቅ","The three youths"],r:"Dan|3",s:[["ንጉሡ የወርቅ ምስል አቆመ","The king sets up a golden statue"],["ሦስቱ ወጣቶች ለምስሉ አንሰግድም አሉ","The three youths refuse to bow to it"],["ወደ እቶን እሳት ተጣሉ","They are thrown into the fiery furnace"],["በእሳቱ ውስጥ እግዚአብሔርን አመሰገኑ","They praise God inside the fire"],["ምንም ሳይነካቸው ወጡ","They come out unharmed"]]},
+ {id:"wall",t:["የኢየሩሳሌም ቅጥር","Jerusalem's wall"],r:"Neh|1–6",s:[["ነሐምያ ቅጥሩ መፍረሱን ሰማ","Nehemiah hears the wall is broken down"],["አልቅሶ ጸለየ","He weeps and prays"],["ንጉሡ እንዲሄድ ፈቀደለት","The king lets him go"],["ሕዝቡ በአንድነት ቅጥሩን ሠሩ","The people rebuild the wall together"],["ቅጥሩ በ52 ቀን ተፈጸመ","The wall is finished in 52 days"]]},
+ {id:"pentecost",t:["በዓለ ሃምሳ","Pentecost"],r:"Acts|1–2",s:[["ኢየሱስ ወደ ሰማይ ዐረገ","Jesus ascends to heaven"],["ሐዋርያት በኢየሩሳሌም በአንድነት ጸለዩ","The apostles pray together in Jerusalem"],["እንደ እሳት ያሉ ልሳናት ወረዱባቸው","Tongues like fire rest on them"],["በልዩ ልዩ ቋንቋ ተናገሩ","They speak in many languages"],["ጴጥሮስ ሰበከ፤ ብዙዎች ተጠመቁ","Peter preaches and many are baptized"]]}
+);
+
 (function(){
 const T={
  en:{app:"Bible Games",langBtn:"አማርኛ",who:"Who is playing?",rename:"Change names",p1Label:"Player 1",p2Label:"Player 2",p3Label:"Guest",nameHint:"Type any name. Leave a box empty to use Mom, Dad or Guest, which switch language with the rest of the app.",save:"Save",mom:"Mom",dad:"Dad",guest:"Guest",
@@ -395,18 +643,23 @@ const T={
   quizT:"Bible Quiz",quizD:"Questions about the Old and New Testaments, Ethiopia in the Bible, and our church tradition.",
   whoT:"Who am I?",whoD:"Clues are shown one at a time. Guess the person early for more points.",
   storyT:"Story Order",storyD:"Put the events of a Bible story in the right order.",
+  booksT:"Books of the Bible",booksD:"Learn the books of our canon: their order, and which part of the Bible each belongs to.",
+  shelfT:"Our Bible bookshelf",seeShelf:"Open the shelf →",shelfOf:(a,b)=>`${a} of ${b} books lit up`,shelfSub:"85 books",
+  shelfHow:"A book lights up when you answer a question about it correctly. Tap a book to play its questions.",bookRound:n=>`Questions from ${n}`,
+  bSecQ:"Which part of the Bible is this book in?",bNextQ:"Which book comes right after this one?",bOrderQ:"Tap these books in the order they come in the Bible.",
+  bOf:(a,b)=>`Item ${a} of ${b}`,bWrong:"Not yet. Which book comes first?",bRight2:"Books game answers",shelfTile:"Books lit on the shelf",
   inProgress:"Round in progress, pick up where you left off",newRound:"Start a new round",
   pickCat:"Choose a topic",start:"Start",all:"All topics",
-  cats:{eth:["ኢትዮጵያ በመጽሐፍ ቅዱስ","Ethiopia in the Bible"],ot:["ብሉይ ኪዳን","Old Testament"],nt:["ሐዲስ ኪዳን","New Testament"],trad:["የቤተ ክርስቲያን ትውፊት","Church tradition"]},
+  cats:{eth:["ኢትዮጵያ በመጽሐፍ ቅዱስ","Ethiopia in the Bible"],ot:["ብሉይ ኪዳን","Old Testament"],dc:["የቀኖና መጻሕፍት","Deuterocanonical books"],nt:["ሐዲስ ኪዳን","New Testament"],trad:["የቤተ ክርስቲያን ትውፊት","Church tradition"]},
   tradTag:"Ethiopian church tradition",qOf:(a,b)=>`Question ${a} of ${b}`,pOf:(a,b)=>`Person ${a} of ${b}`,sOf:(a,b)=>`Story ${a} of ${b}`,
   right:"Correct!",wrong:"Not this time.",answerIs:"The answer:",next:"Next →",finish:"See my score →",
   whoAsk:"Who am I?",moreClue:"Show another clue",worth:p=>`Worth ${p} points if you guess now`,whoWrong:"Not quite. Here is another clue.",whoGot:p=>`Yes! +${p} points`,whoMiss:"That was",
   storyAsk:"Tap the events in the order they happened.",storyWrong:"Not yet. What happened before that?",storyDone:p=>`Well done! +${p} points`,
   doneT:"Round complete",again:"Play another round",
-  cheer:"Wonderful!",continue:"Continue",pts:p=>`+${p} points`,cheerSub:g=>({quiz:"You finished a Bible Quiz round.",who:"You finished a Who am I? round.",story:"You finished a Story Order round."})[g],
+  cheer:"Wonderful!",continue:"Continue",pts:p=>`+${p} points`,cheerSub:g=>({quiz:"You finished a Bible Quiz round.",who:"You finished a Who am I? round.",story:"You finished a Story Order round.",books:"You finished a Books of the Bible round."})[g],
   scoreTitle:n=>`${n}'s scores`,total:"Total points",qRight:"Quiz answers right",wRight:"People guessed",sDone:"Stories ordered",rounds:"Rounds played",
   recent:"Recent rounds",none:"No rounds yet. Play a game to start collecting points.",guestLine:(n,p)=>`${n}: ${p} points (guest, not counted above)`,
-  hist:{quiz:"Bible Quiz",who:"Who am I?",story:"Story Order"},
+  hist:{quiz:"Bible Quiz",who:"Who am I?",story:"Story Order",books:"Books of the Bible"},
   backupT:"Backup",backupD:"Save a backup file now and then. When the share menu opens, choose “Save to Files.” If the iPad ever clears this app, tap Restore and pick that file.",
   backup:"Save backup file",restore:"Restore from file",restored:"Progress restored.",restoreBad:"That file isn't a Bible Games backup.",lastB:d=>`Last backup: ${d}`,noB:"No backup saved yet.",
   greet:["Good morning","Good afternoon","Good evening"]},
@@ -415,43 +668,49 @@ const T={
   quizT:"የመጽሐፍ ቅዱስ ጥያቄ",quizD:"ስለ ብሉይና ሐዲስ ኪዳን፣ ስለ ኢትዮጵያ በመጽሐፍ ቅዱስ እና ስለ ቤተ ክርስቲያን ትውፊት ጥያቄዎች።",
   whoT:"ማን ነኝ?",whoD:"ፍንጮቹ አንድ በአንድ ይታያሉ። ቀድማችሁ ብትገምቱ ብዙ ነጥብ ታገኛላችሁ።",
   storyT:"ታሪኩን በቅደም ተከተል",storyD:"የመጽሐፍ ቅዱስ ታሪክን ክስተቶች በትክክለኛው ቅደም ተከተል አስቀምጡ።",
+  booksT:"የመጻሕፍት ቅደም ተከተል",booksD:"የቀኖናችንን መጻሕፍት ተማሩ፦ ቅደም ተከተላቸውን እና እያንዳንዱ የየትኛው ክፍል እንደሆነ።",
+  shelfT:"የመጽሐፍ ቅዱስ መደርደሪያችን",seeShelf:"መደርደሪያውን ክፈቱ →",shelfOf:(a,b)=>`${a} / ${b} መጻሕፍት በርተዋል`,shelfSub:"85 መጻሕፍት",
+  shelfHow:"ስለ አንድ መጽሐፍ ጥያቄ በትክክል ስትመልሱ መጽሐፉ ይበራል። የአንድን መጽሐፍ ጥያቄዎች ለመጫወት መጽሐፉን ይንኩ።",bookRound:n=>`ከ${n} የተወሰዱ ጥያቄዎች`,
+  bSecQ:"ይህ መጽሐፍ የየትኛው ክፍል ነው?",bNextQ:"ከዚህ መጽሐፍ ቀጥሎ የሚመጣው የትኛው ነው?",bOrderQ:"እነዚህን መጻሕፍት በመጽሐፍ ቅዱስ ውስጥ በሚመጡበት ቅደም ተከተል ይንኩ።",
+  bOf:(a,b)=>`${a} ከ ${b}`,bWrong:"ገና ነው። መጀመሪያ የሚመጣው የትኛው ነው?",bRight2:"የመጻሕፍት ጨዋታ ትክክለኛ መልሶች",shelfTile:"በመደርደሪያው የበሩ መጻሕፍት",
   inProgress:"ያልተጨረሰ ዙር፤ ካቆማችሁበት ቀጥሉ",newRound:"አዲስ ዙር ጀምሩ",
   pickCat:"ርዕስ ይምረጡ",start:"ጀምር",all:"ሁሉም ርዕሶች",
-  cats:{eth:["ኢትዮጵያ በመጽሐፍ ቅዱስ","Ethiopia in the Bible"],ot:["ብሉይ ኪዳን","Old Testament"],nt:["ሐዲስ ኪዳን","New Testament"],trad:["የቤተ ክርስቲያን ትውፊት","Church tradition"]},
+  cats:{eth:["ኢትዮጵያ በመጽሐፍ ቅዱስ","Ethiopia in the Bible"],ot:["ብሉይ ኪዳን","Old Testament"],dc:["የቀኖና መጻሕፍት","Deuterocanonical books"],nt:["ሐዲስ ኪዳን","New Testament"],trad:["የቤተ ክርስቲያን ትውፊት","Church tradition"]},
   tradTag:"የኢትዮጵያ ቤተ ክርስቲያን ትውፊት",qOf:(a,b)=>`ጥያቄ ${a} ከ ${b}`,pOf:(a,b)=>`ሰው ${a} ከ ${b}`,sOf:(a,b)=>`ታሪክ ${a} ከ ${b}`,
   right:"ትክክል!",wrong:"አልሆነም።",answerIs:"መልሱ፦",next:"ቀጣይ →",finish:"ውጤቴን አሳይ →",
   whoAsk:"ማን ነኝ?",moreClue:"ሌላ ፍንጭ አሳይ",worth:p=>`አሁን ብትገምቱ ${p} ነጥብ`,whoWrong:"አልሆነም። ሌላ ፍንጭ ይኸው።",whoGot:p=>`አዎ! +${p} ነጥብ`,whoMiss:"መልሱ",
   storyAsk:"ክስተቶቹን በተከሰቱበት ቅደም ተከተል ይንኩ።",storyWrong:"ገና ነው። ከዚያ በፊት ምን ሆነ?",storyDone:p=>`በጣም ጎበዝ! +${p} ነጥብ`,
   doneT:"ዙሩ ተጠናቀቀ",again:"ሌላ ዙር ተጫወቱ",
-  cheer:"እልል! በጣም ጎበዝ!",continue:"ቀጥሉ",pts:p=>`+${p} ነጥብ`,cheerSub:g=>({quiz:"የመጽሐፍ ቅዱስ ጥያቄ ዙር ጨረሳችሁ።",who:"የ«ማን ነኝ?» ዙር ጨረሳችሁ።",story:"የታሪክ ቅደም ተከተል ዙር ጨረሳችሁ።"})[g],
+  cheer:"እልል! በጣም ጎበዝ!",continue:"ቀጥሉ",pts:p=>`+${p} ነጥብ`,cheerSub:g=>({quiz:"የመጽሐፍ ቅዱስ ጥያቄ ዙር ጨረሳችሁ።",who:"የ«ማን ነኝ?» ዙር ጨረሳችሁ።",story:"የታሪክ ቅደም ተከተል ዙር ጨረሳችሁ።",books:"የመጻሕፍት ቅደም ተከተል ዙር ጨረሳችሁ።"})[g],
   scoreTitle:n=>`የ${n} ውጤቶች`,total:"ጠቅላላ ነጥብ",qRight:"ትክክለኛ መልሶች",wRight:"የተገመቱ ሰዎች",sDone:"የተደረደሩ ታሪኮች",rounds:"የተጫወቱት ዙሮች",
   recent:"የቅርብ ጊዜ ዙሮች",none:"ገና ምንም ዙር የለም። ነጥብ ለመሰብሰብ ጨዋታ ጀምሩ።",guestLine:(n,p)=>`${n}፦ ${p} ነጥብ (እንግዳ፤ ከላይ አልተቆጠረም)`,
-  hist:{quiz:"የመጽሐፍ ቅዱስ ጥያቄ",who:"ማን ነኝ?",story:"ታሪኩን በቅደም ተከተል"},
+  hist:{quiz:"የመጽሐፍ ቅዱስ ጥያቄ",who:"ማን ነኝ?",story:"ታሪኩን በቅደም ተከተል",books:"የመጻሕፍት ቅደም ተከተል"},
   backupT:"መጠባበቂያ",backupD:"አልፎ አልፎ የመጠባበቂያ ፋይል አስቀምጡ። የማጋሪያ ዝርዝሩ ሲከፈት «Save to Files» ይምረጡ። አይፓዱ መተግበሪያውን ቢያጠፋ «ከፋይል መልስ» ይንኩና ያንን ፋይል ይምረጡ።",
   backup:"መጠባበቂያ አስቀምጥ",restore:"ከፋይል መልስ",restored:"እድገቱ ተመልሷል።",restoreBad:"ይህ የመጽሐፍ ቅዱስ ጨዋታዎች መጠባበቂያ አይደለም።",lastB:d=>`የመጨረሻ መጠባበቂያ፦ ${d}`,noB:"ገና መጠባበቂያ አልተቀመጠም።",
   greet:["እንደምን አደሩ","እንደምን ዋሉ","እንደምን አመሹ"]}
 };
-const ROUND={quiz:10,who:5,story:3};
+const ROUND={quiz:10,who:5,story:3,books:6};
 const ls=makeLS("bible1.");
 let lang=ls.get("lang","en");const t=k=>T[lang][k];
-const blank=()=>({name:"",pts:0,qRight:0,wRight:0,sDone:0,rounds:0,seen:{quiz:[],who:[],story:[]},hist:[],round:null,days:[],updatedAt:0});
-let players=[0,1,2].map(i=>Object.assign(blank(),ls.get("p"+i,{})));
+const blank=()=>({name:"",pts:0,qRight:0,wRight:0,sDone:0,bRight:0,books:{},rounds:0,seen:{quiz:[],who:[],story:[]},hist:[],round:null,days:[],updatedAt:0});
+const fixP=p=>{p.books=p.books||{};p.bRight=p.bRight||0;return p};
+let players=[0,1,2].map(i=>fixP(Object.assign(blank(),ls.get("p"+i,{}))));
 let cur=ls.get("cur",0);if(![0,1,2].includes(cur))cur=0;
 const P=()=>players[cur],pname=i=>{const n=players[i].name;return n?(n[0]==="@"?t(n.slice(1)):n):t(["mom","dad","guest"][i])};
 function save(){P().updatedAt=Date.now();ls.set("p"+cur,P())}
 const L=pair=>lang==="am"?pair[0]:pair[1];
-function refText(r){if(!r)return"";const [b,v]=r.split("|");const bk=BOOKS[b]||[b,b];return lang==="am"?`${bk[0]} ${v.replace(/:/g,"፥")}`:`${bk[1]} ${v}`}
+function refText(r){if(!r)return"";const [b,v]=r.split("|");const bk=BOOKS[b]||[b,b];return (lang==="am"?`${bk[0]} ${v.replace(/:/g,"፥")}`:`${bk[1]} ${v}`).trim()}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 /* ---------- views ---------- */
 let view="home",cat=ls.get("cat","all");
-function show(v){view=v;["home","cat","play","done","scores"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
+function show(v){view=v;["home","cat","shelf","play","done","scores"].forEach(n=>$("v-"+n).hidden=n!==v);window.scrollTo(0,0)}
 document.querySelectorAll("[data-home]").forEach(b=>b.onclick=()=>{show("home");renderHome()});
 function applyLang(){
  document.documentElement.lang=lang;
  document.querySelectorAll("[data-t]").forEach(el=>{const v=t(el.dataset.t);if(typeof v==="string")el.textContent=v});
  $("langBtn").textContent=t("langBtn");const h=new Date().getHours();$("greet").textContent=t("greet")[h<12?0:h<17?1:2];
- renderHome();if(view==="play")renderPlay();if(view==="done")renderDone();if(view==="scores")renderScores();if(view==="cat")renderCats();
+ renderHome();if(view==="play")renderPlay();if(view==="done")renderDone();if(view==="scores")renderScores();if(view==="cat")renderCats();if(view==="shelf")renderShelf();
 }
 $("langBtn").onclick=()=>{lang=lang==="en"?"am":"en";ls.set("lang",lang);applyLang()};
 
@@ -463,8 +722,8 @@ function renderHome(){
   b.querySelector(".av").textContent=[...nm][0]||"?";b.querySelector(".nm").textContent=nm;b.querySelector(".pt").textContent=players[i].pts+" "+t("points");
   b.onclick=()=>{cur=i;ls.set("cur",i);gArm=false;$("renameForm").hidden=true;renderHome()};box.appendChild(b)});
  $("newGuestBtn").hidden=cur!==2;$("newGuestBtn").textContent=gArm?t("newGuestC"):t("newGuest");
- ["quiz","who","story"].forEach(g=>$("st-"+g).textContent=P().round&&P().round.g===g?t("inProgress"):t("newRound"));
- $("homePts").textContent=P().pts;
+ ["quiz","who","story","books"].forEach(g=>$("st-"+g).textContent=P().round&&P().round.g===g?t("inProgress"):t("newRound"));
+ $("homePts").textContent=P().pts;const lit=litCount();$("homeShelf").textContent=T[lang].shelfOf(lit,CANON.length);$("homeMeter").style.width=Math.round(100*lit/CANON.length)+"%";
 }
 $("newGuestBtn").onclick=()=>{if(!gArm){gArm=true;renderHome();setTimeout(()=>{gArm=false;renderHome()},3000);return}gArm=false;players[2]=blank();ls.set("p2",players[2]);renderHome()};
 const DEFNAMES=[["Mom","እማማ"],["Dad","አባባ"],["Guest","እንግዳ"]];
@@ -479,6 +738,7 @@ document.querySelectorAll("[data-game]").forEach(b=>b.onclick=()=>{const g=b.dat
  if(g==="quiz"){show("cat");renderCats();return}
  newRound(g);show("play");renderPlay()});
 $("goScores").onclick=()=>{show("scores");renderScores()};
+$("goShelf").onclick=()=>{show("shelf");renderShelf()};
 
 function renderCats(){
  const box=$("cats");box.innerHTML="";
@@ -494,30 +754,39 @@ function pickIds(g,list){
  if(pool.length<ROUND[g]){P().seen[g]=[];pool=list}
  return shuffle(pool).slice(0,ROUND[g]).map(x=>x.id);
 }
-function newRound(g){
+function newRound(g,bookKey){
  let r={g,i:0,res:[],st:{}};
- if(g==="quiz"){const list=QUIZ.filter(q=>cat==="all"||q.c===cat);r.cat=cat;r.ids=pickIds(g,list)}
+ if(g==="quiz"&&!bookKey){const list=QUIZ.filter(q=>cat==="all"||q.c===cat);r.cat=cat;r.ids=pickIds(g,list)}
  if(g==="who")r.ids=pickIds(g,WHO);
  if(g==="story")r.ids=pickIds(g,STORY);
+ if(g==="quiz"&&bookKey){r.book=bookKey;r.cat="book";r.ids=shuffle(QUIZ.filter(q=>bookOf(q)===bookKey)).slice(0,ROUND.quiz).map(q=>q.id)}
+ if(g==="books"){r.items=booksItems();r.ids=r.items.map((_,i)=>"b"+i)}
  P().round=r;initItem();save();
 }
 function initItem(){
  const r=P().round,id=r.ids[r.i];
  if(r.g==="quiz")r.st={order:shuffle([0,1,2,3]),pick:null};
  if(r.g==="who"){const others=shuffle(WHO.filter(w=>w.id!==id)).slice(0,3).map(w=>w.id);r.st={shown:1,wrong:[],opts:shuffle([id,...others]),done:false,pts:0}}
+ if(r.g==="books"){const it=r.items[r.i];
+  if(it.t==="sec")r.st={order:shuffle(["ot","dc","nt"]),pick:null};
+  if(it.t==="next")r.st={opts:shuffle(it.o),pick:null};
+  if(it.t==="order"){let o;do{o=shuffle([0,1,2,3])}while(o.every((v,i)=>v===i));r.st={order:o,placed:[],mistakes:0,done:false,msg:""}}}
  if(r.g==="story"){const s=STORY.find(x=>x.id===id);let o;do{o=shuffle(s.s.map((_,i)=>i))}while(o.every((v,i)=>v===i));r.st={order:o,placed:[],mistakes:0,done:false,msg:""}}
 }
-function renderDots(){const r=P().round,d=$("dots");d.innerHTML="";const max={quiz:10,who:40,story:10}[r.g];
+function renderDots(){const r=P().round,d=$("dots");d.innerHTML="";const max={quiz:10,who:40,story:10,books:10}[r.g];
  r.ids.forEach((_,i)=>{const e=document.createElement("i");const v=r.res[i];if(v!=null)e.className=v>=max?"ok":v>0?"half":"miss";else if(i===r.i)e.className="now";d.appendChild(e)})}
 function renderPlay(){
  const r=P().round;if(!r){show("home");renderHome();return}
  renderDots();const n=r.ids.length;
- $("counter").textContent=T[lang][r.g==="quiz"?"qOf":r.g==="who"?"pOf":"sOf"](r.i+1,n);
- ({quiz:renderQuiz,who:renderWho,story:renderStory})[r.g]();
+ $("counter").textContent=(r.book?T[lang].bookRound(L(BOOKS[r.book]))+" · ":"")+T[lang][r.g==="quiz"?"qOf":r.g==="who"?"pOf":r.g==="books"?"bOf":"sOf"](r.i+1,n);
+ ({quiz:renderQuiz,who:renderWho,story:renderStory,books:renderBooks})[r.g]();
 }
 function nextBtn(){const r=P().round;const b=document.createElement("button");b.type="button";b.className="btn primary";b.textContent=r.i>=r.ids.length-1?t("finish"):t("next");b.onclick=nextItem;return b}
 function nextItem(){const r=P().round;if(r.i>=r.ids.length-1){finishRound();return}r.i++;initItem();save();renderPlay();window.scrollTo(0,0)}
-function scoreItem(pts){const r=P().round;if(r.res[r.i]!=null)return;r.res[r.i]=pts;P().pts+=pts;const s=P().seen[r.g];if(!s.includes(r.ids[r.i]))s.push(r.ids[r.i]);save()}
+function scoreItem(pts){const r=P().round;if(r.res[r.i]!=null)return;r.res[r.i]=pts;P().pts+=pts;const s=P().seen[r.g];if(s&&!r.book&&!s.includes(r.ids[r.i]))s.push(r.ids[r.i]);save()}
+/* the bookshelf: a book lights up once a question, person or story from it is answered right */
+function creditBook(x){const b=bookOf(x);if(b&&BOOKS[b]){P().books[b]=(P().books[b]||0)+1}}
+const litCount=()=>CANON.filter(c=>P().books[c[0]]>0).length;
 
 /* quiz */
 function renderQuiz(){
@@ -530,7 +799,7 @@ function renderQuiz(){
  st.order.forEach(oi=>{const o=q.o[oi];const b=document.createElement("button");b.type="button";b.className="opt";
   b.innerHTML=`<span class="a"></span><span class="e"></span>`;b.querySelector(".a").textContent=o[0];b.querySelector(".e").textContent=o[0]===o[1]?"":o[1];
   if(st.pick!=null){b.disabled=true;if(oi===0)b.classList.add("right");else if(oi===st.pick)b.classList.add("wrong");else b.classList.add("dim")}
-  b.onclick=()=>{if(st.pick!=null)return;st.pick=oi;r.qTotal=(r.qTotal||0)+1;if(oi===0)P().qRight++;scoreItem(oi===0?10:0);renderPlay()};opts.appendChild(b)});
+  b.onclick=()=>{if(st.pick!=null)return;st.pick=oi;r.qTotal=(r.qTotal||0)+1;if(oi===0){P().qRight++;creditBook(q)}scoreItem(oi===0?10:0);renderPlay()};opts.appendChild(b)});
  if(st.pick!=null){
   const n=document.createElement("div");n.className="note";const ok=st.pick===0;
   n.innerHTML=`<span class="v"></span><span class="ans"></span><span class="x"></span><span class="ref"></span>`;
@@ -562,7 +831,7 @@ function renderWho(){
   if(st.wrong.includes(id)){b.disabled=true;b.classList.add("wrong")}
   if(st.done){b.disabled=true;if(id===w.id)b.classList.add("right");else if(!st.wrong.includes(id))b.classList.add("dim")}
   b.onclick=()=>{if(st.done)return;
-   if(id===w.id){st.done=true;st.pts=WORTH[st.shown-1];P().wRight++;scoreItem(st.pts)}
+   if(id===w.id){st.done=true;st.pts=WORTH[st.shown-1];P().wRight++;creditBook(w);scoreItem(st.pts)}
    else{st.wrong.push(id);st.lastWrong=true;if(st.shown<4)st.shown++;else{st.done=true;st.pts=0;scoreItem(0)}save()}
    renderPlay()};opts.appendChild(b)});
  const act=document.createElement("div");act.className="row";card.appendChild(act);
@@ -582,16 +851,70 @@ function renderStory(){
  const box=document.createElement("div");box.className="steps";card.appendChild(box);
  st.order.filter(i=>!st.placed.includes(i)).forEach(i=>{const b=document.createElement("button");b.type="button";b.className="step";
   b.innerHTML=`<span class="a"></span><span class="e"></span>`;b.querySelector(".a").textContent=s.s[i][0];b.querySelector(".e").textContent=s.s[i][1];
-  b.onclick=()=>{if(i===st.placed.length){st.placed.push(i);st.msg="";if(st.placed.length===s.s.length){st.done=true;P().sDone++;scoreItem(Math.max(2,10-2*st.mistakes))}save();renderPlay()}
+  b.onclick=()=>{if(i===st.placed.length){st.placed.push(i);st.msg="";if(st.placed.length===s.s.length){st.done=true;P().sDone++;creditBook(s);scoreItem(Math.max(2,10-2*st.mistakes))}save();renderPlay()}
    else{st.mistakes++;st.msg="x";save();b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");msg.textContent=t("storyWrong");msg.className="feedback bad"}};box.appendChild(b)});
  if(st.done){const a=document.createElement("div");a.appendChild(nextBtn());card.appendChild(a)}
 }
+
+/* books of the Bible: 6 items mixing three kinds */
+const secOf=k=>CANON.find(c=>c[0]===k)[4];
+function booksItems(){
+ const idx=k=>CANON.findIndex(c=>c[0]===k),inSec=s=>CANON.filter(c=>c[4]===s).map(c=>c[0]);
+ const pickSec=()=>{const pool=CANON.filter(c=>c[0]!=="Esth"&&c[0]!=="EsthD");return {t:"sec",k:pool[Math.floor(Math.random()*pool.length)][0]}};
+ const pickNext=()=>{const s=["ot","dc","nt"][Math.floor(Math.random()*3)],list=inSec(s),i=Math.floor(Math.random()*(list.length-1));
+  const right=list[i+1],others=shuffle(list.filter((k,j)=>j!==i&&j!==i+1)).slice(0,3);return {t:"next",k:list[i],ans:right,o:[right,...others]}};
+ const pickOrder=()=>{const s=["ot","dc","nt"][Math.floor(Math.random()*3)],list=inSec(s),i=Math.floor(Math.random()*(list.length-3));return {t:"order",ks:list.slice(i,i+4)}};
+ return shuffle([pickSec(),pickSec(),pickNext(),pickNext(),pickOrder(),pickOrder()]);
+}
+const fullName=k=>CANON.find(c=>c[0]===k);
+function bookLabel(el,k){const c=fullName(k);el.innerHTML=`<span class="a"></span><span class="e"></span>`;el.querySelector(".a").textContent=c[1];el.querySelector(".e").textContent=c[3]}
+function renderBooks(){
+ const r=P().round,it=r.items[r.i],st=r.st,el=$("stage");el.innerHTML="";
+ const card=document.createElement("div");card.className="card";el.appendChild(card);
+ const ask=document.createElement("h2");ask.textContent=t(it.t==="sec"?"bSecQ":it.t==="next"?"bNextQ":"bOrderQ");card.appendChild(ask);
+ if(it.t!=="order"){
+  const nm=document.createElement("div");const c=fullName(it.k);nm.innerHTML=`<div class="bkname"></div><div class="qen"></div>`;nm.firstChild.textContent=c[1];nm.lastChild.textContent=c[3];card.appendChild(nm);
+  const opts=document.createElement("div");opts.className="opts";card.appendChild(opts);
+  const list=it.t==="sec"?st.order:st.opts,right=it.t==="sec"?secOf(it.k):it.ans;
+  list.forEach(o=>{const b=document.createElement("button");b.type="button";b.className="opt";
+   if(it.t==="sec"){b.innerHTML=`<span class="a"></span><span class="e"></span>`;b.querySelector(".a").textContent=SECTIONS[o][0];b.querySelector(".e").textContent=SECTIONS[o][1]}else bookLabel(b,o);
+   if(st.pick!=null){b.disabled=true;if(o===right)b.classList.add("right");else if(o===st.pick)b.classList.add("wrong");else b.classList.add("dim")}
+   b.onclick=()=>{if(st.pick!=null)return;st.pick=o;if(o===right)P().bRight++;scoreItem(o===right?10:0);renderPlay()};opts.appendChild(b)});
+  if(st.pick!=null){const n=document.createElement("div");n.className="note";const ok=st.pick===right;
+   n.innerHTML=`<span class="v"></span><span class="ans"></span>`;n.querySelector(".v").textContent=ok?t("right"):t("wrong");n.querySelector(".v").style.color=ok?"var(--ok)":"var(--warn)";
+   const ra=it.t==="sec"?SECTIONS[right]:[fullName(right)[1],fullName(right)[3]];n.querySelector(".ans").textContent=ok?"":t("answerIs")+" "+ra[0]+" · "+ra[1];
+   card.appendChild(n);const a=document.createElement("div");a.appendChild(nextBtn());card.appendChild(a)}
+  return}
+ const sec=document.createElement("span");sec.className="tag";sec.textContent=L(SECTIONS[secOf(it.ks[0])]);card.insertBefore(sec,ask);
+ const ol=document.createElement("ol");ol.className="placed";card.appendChild(ol);
+ it.ks.forEach((_,i)=>{const li=document.createElement("li");if(i<st.placed.length){li.innerHTML=`<span class="n">${i+1}</span><span class="nm"></span>`;bookLabel(li.querySelector(".nm"),it.ks[st.placed[i]]);li.querySelector(".nm").style.display="flex";li.querySelector(".nm").style.flexDirection="column"}else li.className="empty";ol.appendChild(li)});
+ const msg=document.createElement("div");msg.className="feedback";card.appendChild(msg);
+ if(st.done){msg.textContent=T[lang].storyDone(r.res[r.i]);msg.classList.add("ok")}else if(st.msg){msg.textContent=t("bWrong");msg.classList.add("bad")}
+ const box=document.createElement("div");box.className="steps";card.appendChild(box);
+ st.order.filter(i=>!st.placed.includes(i)).forEach(i=>{const b=document.createElement("button");b.type="button";b.className="step";bookLabel(b,it.ks[i]);
+  b.onclick=()=>{if(i===st.placed.length){st.placed.push(i);st.msg="";if(st.placed.length===4){st.done=true;const pts=Math.max(2,10-2*st.mistakes);if(pts===10)P().bRight++;scoreItem(pts)}save();renderPlay()}
+   else{st.mistakes++;st.msg="x";save();b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");msg.textContent=t("bWrong");msg.className="feedback bad"}};box.appendChild(b)});
+ if(st.done){const a=document.createElement("div");a.appendChild(nextBtn());card.appendChild(a)}
+}
+function renderShelf(){
+ const p=P(),box=$("shelfSecs");box.innerHTML="";$("shelfCount").textContent=T[lang].shelfOf(litCount(),CANON.length);
+ ["ot","dc","nt"].forEach(s=>{const list=CANON.filter(c=>c[4]===s),lit=list.filter(c=>p.books[c[0]]>0).length;
+  const sec=document.createElement("div");sec.className="panel sec";sec.innerHTML=`<h3><span class="geez"></span><small></small></h3><div class="books"></div>`;
+  sec.querySelector(".geez").textContent=SECTIONS[s][0]+" · "+SECTIONS[s][1];sec.querySelector("small").textContent=lit+" / "+list.length;
+  const g=sec.querySelector(".books");
+  list.forEach(c=>{const b=document.createElement("button");b.type="button";const n=p.books[c[0]]||0,has=QUIZ.some(q=>bookOf(q)===c[0]);
+   b.className="bk"+(n?" lit":"");if(n)b.dataset.n=n;b.disabled=!has;bookLabel(b,c[0]);
+   b.onclick=()=>{if(!has)return;if(P().round&&!confirmLeave())return;newRound("quiz",c[0]);show("play");renderPlay()};g.appendChild(b)});
+  box.appendChild(sec)});
+}
+/* starting a book's questions replaces an unfinished round, so ask once (tap again within 3 s) */
+let leaveArm=0;function confirmLeave(){if(Date.now()-leaveArm<3000)return true;leaveArm=Date.now();toast(lang==="am"?"ያልተጨረሰ ዙር አለ፤ ለመቀጠል እንደገና ይንኩ":"A round is unfinished. Tap again to start this book instead.");return false}
 
 function finishRound(){
  const r=P().round,total=r.res.reduce((a,b)=>a+(b||0),0);
  P().rounds++;const d=dayStr();if(!P().days.includes(d))P().days.push(d);
  P().hist.unshift({d,g:r.g,pts:total});P().hist=P().hist.slice(0,30);
- P().last={g:r.g,pts:total,ids:r.ids,res:r.res};P().round=null;save();
+ P().last={g:r.g,pts:total,ids:r.ids,res:r.res,book:r.book||null};P().round=null;save();
  show("done");renderDone();
  const letters=["እ","ል","ል","ሃ","ሌ","ሉ","ያ"];cheer(T[lang].cheerSub(r.g),total,letters);
 }
@@ -600,14 +923,15 @@ function renderDone(){
  const c=$("doneCard");c.innerHTML=`<div class="label"></div><h2></h2><div class="big"></div><div class="row" style="justify-content:center"></div>`;
  c.querySelector(".label").textContent=T[lang].hist[l.g];c.querySelector("h2").textContent=t("doneT");c.querySelector(".big").textContent=T[lang].pts(l.pts);
  const row=c.querySelector(".row");const a=document.createElement("button");a.type="button";a.className="btn primary";a.textContent=t("again");
- a.onclick=()=>{if(l.g==="quiz"){show("cat");renderCats()}else{newRound(l.g);show("play");renderPlay()}};row.appendChild(a);
+ a.onclick=()=>{if(l.g==="quiz"&&l.book){newRound("quiz",l.book);show("play");renderPlay()}else if(l.g==="quiz"){show("cat");renderCats()}else{newRound(l.g);show("play");renderPlay()}};row.appendChild(a);
+ if(l.book){const s=document.createElement("button");s.type="button";s.className="btn ghost";s.textContent=t("seeShelf");s.onclick=()=>{show("shelf");renderShelf()};row.appendChild(s)}
  const h=document.createElement("button");h.type="button";h.className="btn ghost";h.textContent=t("home");h.onclick=()=>{show("home");renderHome()};row.appendChild(h);
 }
 
 /* ---------- scores ---------- */
 function renderScores(){
  const p=P();$("scoreTitle").textContent=T[lang].scoreTitle(pname(cur));
- $("statTiles").innerHTML=[["total",p.pts],["qRight",p.qRight],["wRight",p.wRight],["sDone",p.sDone],["rounds",p.rounds]].map(([k,v])=>`<div class="stat"><span class="muted small">${esc(t(k))}</span><b>${v}</b></div>`).join("");
+ $("statTiles").innerHTML=[["total",p.pts],["qRight",p.qRight],["wRight",p.wRight],["sDone",p.sDone],["bRight2",p.bRight],["shelfTile",litCount()+" / "+CANON.length],["rounds",p.rounds]].map(([k,v])=>`<div class="stat"><span class="muted small">${esc(t(k))}</span><b>${v}</b></div>`).join("");
  $("bothTitle").textContent=pname(0)+" · "+pname(1);
  const a=players[0].pts,b=players[1].pts;
  $("vs").innerHTML=[0,1].map(i=>{const v=players[i].pts,lead=v>0&&a!==b&&v===Math.max(a,b);return `<div class="stat${lead?" lead":""}"><span class="small">${esc(pname(i))}${lead?" ★":""}</span><b>${v}</b></div>`}).join("");
@@ -618,7 +942,7 @@ function renderScores(){
 $("backupBtn").onclick=async()=>{if(await downloadJSON({app:"bible-games",version:1,savedAt:new Date().toISOString(),players,cur},"bible-games-backup-"+dayStr()+".json")){ls.set("lastBackup",dayStr());renderScores();toast("✓")}};
 $("restoreInput").onchange=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
  try{const d=JSON.parse(await readText(f));if(d.app!=="bible-games"||!Array.isArray(d.players))throw 0;
-  players=[0,1,2].map(i=>Object.assign(blank(),d.players[i]||{}));players.forEach((p,i)=>ls.set("p"+i,p));renderScores();renderHome();
+  players=[0,1,2].map(i=>fixP(Object.assign(blank(),d.players[i]||{})));players.forEach((p,i)=>ls.set("p"+i,p));renderScores();renderHome();
   $("restoreMsg").textContent=t("restored");$("restoreMsg").className="feedback ok"}
  catch(err){$("restoreMsg").textContent=t("restoreBad");$("restoreMsg").className="feedback bad"}};
 
